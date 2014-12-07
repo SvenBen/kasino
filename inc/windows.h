@@ -88,6 +88,7 @@ private:
 	// Represent status of control elements
 	StreamQuality selectedStreamQuality;
 	std::string selectedServer;
+	int selectedServerIndex;
 	bool selectedSlowmo;
 
 	// control elements

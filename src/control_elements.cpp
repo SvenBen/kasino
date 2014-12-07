@@ -88,7 +88,6 @@ void StreamControls::cbSlowmoChanged()
 
 void StreamControls::cbStartStreamPressed()
 {
-	// todo
 	btn_start_stream->set_sensitive(false);
 	btn_stop_stream->set_sensitive(true);
 	mainWindow->createPacketReceiver();
@@ -103,4 +102,5 @@ void StreamControls::cbStopStreamPressed()
 void StreamControls::cbServerChanged()
 {
 	mainWindow->selectedServer = servers->get_active_text();
+	mainWindow->selectedServerIndex = servers->get_active_row_number();
 }

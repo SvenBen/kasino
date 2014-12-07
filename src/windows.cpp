@@ -57,9 +57,6 @@ const std::string MainWindow::WINDOW_NAME = "main_window";
 
 MainWindow::MainWindow(Gui* gui) : Window(gui, MainWindow::WINDOW_NAME),
 								   SETTINGS_FILE("gui/gui_settings.xml"),
-								   selectedStreamQuality(QUALI_HD),
-								   selectedServer(""),
-								   selectedSlowmo(true),
 								   streamControls(this),
 								   viewOptionsControls(this),
 								   newRoundDispatcher(sigc::mem_fun(*this, &MainWindow::cbNewRound)),
@@ -72,6 +69,12 @@ MainWindow::MainWindow(Gui* gui) : Window(gui, MainWindow::WINDOW_NAME),
 	packetReceiver = NULL;
 	setUpWindow();
 	setUpCallbacks();
+
+	selectedStreamQuality = QUALI_HD;
+	selectedServerIndex = streamControls.servers->get_active_row_number();
+	selectedServer = streamControls.servers->get_active_text();
+	selectedSlowmo = true;
+
 	try
 	{
 		loadSettings();
@@ -131,9 +134,8 @@ void MainWindow::loadSettings()
 	{
 		if (settings[STR_SETTING_SLOWMO].type() == cv::FileNode::INT)
 		{
-			bool slowmo;
-			settings[STR_SETTING_SLOWMO] >> slowmo;
-			if (slowmo)
+			settings[STR_SETTING_SLOWMO] >> selectedSlowmo;
+			if (selectedSlowmo)
 			{
 				streamControls.slowmotion_on->set_active();
 			}
@@ -151,18 +153,22 @@ void MainWindow::loadSettings()
 			{
 			case QUALI_HD:
 				streamControls.quali_hd->set_active();
+				selectedStreamQuality = QUALI_HD;
 				break;
 
 			case QUALI_HIGH:
 				streamControls.quali_high->set_active();
+				selectedStreamQuality = QUALI_HIGH;
 				break;
 
 			case QUALI_MEDIUM:
 				streamControls.quali_medium->set_active();
+				selectedStreamQuality = QUALI_MEDIUM;
 				break;
 
 			case QUALI_LOW:
 				streamControls.quali_low->set_active();
+				selectedStreamQuality = QUALI_LOW;
 				break;
 			default:
 				throw KasinoException(STR_ERR_READING_SETTINGS);
@@ -171,9 +177,9 @@ void MainWindow::loadSettings()
 
 		if (settings[STR_SETTING_SERVER].type() == cv::FileNode::INT)
 		{
-			int serverIndex;
-			settings[STR_SETTING_SERVER] >> serverIndex;
-			streamControls.servers->set_active(serverIndex);
+			settings[STR_SETTING_SERVER] >> selectedServerIndex;
+			streamControls.servers->set_active(selectedServerIndex);
+			selectedServer = streamControls.servers->get_active_text();
 		}
 
 		// todo
@@ -210,42 +216,8 @@ void MainWindow::saveSettings()
 	cv::FileStorage settings(SETTINGS_FILE, cv::FileStorage::WRITE);
 	if (settings.isOpened())
 	{
-		bool slowmo;
-		if (streamControls.slowmotion_off->get_active())
-		{
-			slowmo = false;
-		}
-		else if (streamControls.slowmotion_on->get_active())
-		{
-			slowmo = true;
-		}
-		else
-		{
-			assert(0);
-		}
-
-		settings << STR_SETTING_SLOWMO << slowmo;
-
-		StreamQuality quali;
-		if (streamControls.quali_hd->get_active())
-		{
-			quali = QUALI_HD;
-		}
-		else if (streamControls.quali_high->get_active())
-		{
-			quali = QUALI_HIGH;
-		}
-		else if (streamControls.quali_medium->get_active())
-		{
-			quali = QUALI_MEDIUM;
-		}
-		else if (streamControls.quali_low->get_active())
-		{
-			quali = QUALI_LOW;
-		}
-
-		settings << STR_SETTING_QUALI << (int)quali;
-
+		settings << STR_SETTING_SLOWMO << selectedSlowmo;
+		settings << STR_SETTING_QUALI << selectedStreamQuality;
 		settings << STR_SETTING_SERVER << streamControls.servers->get_active_row_number();
 
 		// todo

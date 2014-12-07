@@ -11,8 +11,10 @@ Gui::Gui(Application* app) : app(app),
 							 statisticWindow(this),
 							 frameWindow(this),
 							 statusWindow(this),
-							 mainWindow(this)
+							 mainWindow(this, &frameWindow, &statisticWindow)
 {
+	frameWindow.setMainWindow(&mainWindow);
+	statisticWindow.setMainWindow(&mainWindow);
 	// TODO
 }
 

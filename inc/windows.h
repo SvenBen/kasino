@@ -22,6 +22,7 @@
 #include "packet_receiver.h"
 
 class Gui;
+class StatisticWindow;
 
 class Window
 {
@@ -46,16 +47,21 @@ class FrameWindow : Window
 private:
 	static const std::string GLADE_FILE;
 	static const std::string WINDOW_NAME;
-/*
+
 	Gtk::Image* frame_img;
-*/
 	ValueDispatcher<SharedFramePtr> newFrameDispatcher;
+	MainWindow* mainWindow;
 
 public:
 	FrameWindow(Gui* gui);
+	void setVisible(bool v);
+	void setMainWindow(MainWindow* mainWindow);
 
 private:
+	void setUpWindow();
+	void setUpCallbacks();
 	void cbNewFrame();
+	void cbWindowHidden();
 /*
 	virtual void setUpWindow(const Glib::RefPtr<Gtk::Builder>& builder);
 	virtual void setUpCallbacks();
@@ -85,6 +91,8 @@ private:
 	const std::string SETTINGS_FILE;
 
 	PacketReceiver* packetReceiver;
+	FrameWindow* frameWindow;
+	StatisticWindow* statisticWindow;
 
 	// Represent status of control elements
 	StreamQuality selectedStreamQuality;
@@ -117,6 +125,8 @@ private:
 	ValueDispatcher<int> newRoundDispatcher;
 	ValueDispatcher<int> newCalculatedResultDispatcher;
 	Dispatcher packetReceiverDestroyedDispatcher;
+	Dispatcher statisticWindowHiddenDispatcher;
+	Dispatcher frameWindowHiddenDispatcher;
 	Dispatcher imageSaverDestroyedDispatcher;
 	Dispatcher videoWriterDestroyedDispatcher;
 	ValueDispatcher<Perspective> perspectiveCalculatedDispatcher;
@@ -126,13 +136,14 @@ private:
 	Glib::Threads::Mutex controlValueMutex;
 
 public:
-	MainWindow(Gui* gui);
+	MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw);
 	virtual ~MainWindow();
 	Gtk::Window* getGtkWindow();
 	const SharedUserObservationsPtr getUserObservations();
 
-
 	void notifyPackerReceiverDestroyed();
+	void notifyFrameWindowHidden();
+	void notifyStatisticWindowHidden();
 
 private:
 	virtual void setUpWindow();
@@ -144,6 +155,8 @@ private:
 	void cbNewRound();
 	void cbNewCalculatedResult();
 	void cbPacketReceiverDestroyed();
+	void cbFrameWindowHidden();
+	void cbStatisticWindowHidden();
 	void cbImageSaverDestroyed();
 	void cbVideoWriterDestroyed();
 	void cbPerspectiveCalculated();
@@ -158,11 +171,18 @@ private:
 	static const std::string GLADE_FILE;
 	static const std::string WINDOW_NAME;
 
+	MainWindow* mainWindow;
+	Gtk::Image* statistic_img;
+
 public:
 	StatisticWindow(Gui* gui);
+	void setVisible(bool v);
+	void setMainWindow(MainWindow* mainWindow);
 
 private:
+	void setUpWindow();
 	void setUpCallbacks();
+	void cbWindowHidden();
 	// todo
 };
 

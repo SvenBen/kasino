@@ -6,7 +6,7 @@
 #include "application.h"
 #include "kasino_exception.h"
 
-int main (int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 	try
 	{

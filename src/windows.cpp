@@ -33,7 +33,39 @@ FrameWindow::FrameWindow(Gui* gui) :
 		Window(gui, FrameWindow::WINDOW_NAME),
 		newFrameDispatcher(sigc::mem_fun(*this, &FrameWindow::cbNewFrame))
 {
+	mainWindow = NULL;
+	frame_img = NULL;
+	setUpWindow();
+	setUpCallbacks();
 	// todo
+}
+
+void FrameWindow::setVisible(bool v)
+{
+	if (v)
+	{
+		window->show_all();
+	}
+	else
+	{
+		window->hide();
+	}
+}
+
+void FrameWindow::setMainWindow(MainWindow* mainWindow)
+{
+	this->mainWindow = mainWindow;
+}
+
+void FrameWindow::setUpWindow()
+{
+	Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_file(GLADE_FILE);
+	Window::setUpWindow(builder);
+	builder->get_widget("frame_img", frame_img);
+}
+void FrameWindow::setUpCallbacks()
+{
+	window->signal_hide().connect(sigc::mem_fun(*this, &FrameWindow::cbWindowHidden));
 }
 
 void FrameWindow::cbNewFrame()
@@ -41,6 +73,13 @@ void FrameWindow::cbNewFrame()
 	// todo
 }
 
+void FrameWindow::cbWindowHidden()
+{
+	if (mainWindow != NULL)
+	{
+		mainWindow->notifyFrameWindowHidden();
+	}
+}
 
 const std::string StatusWindow::GLADE_FILE = "gui/status_window.glade";
 const std::string StatusWindow::WINDOW_NAME = "status_window";
@@ -55,18 +94,23 @@ StatusWindow::StatusWindow(Gui* gui) :
 const std::string MainWindow::GLADE_FILE = "gui/main_window.glade";
 const std::string MainWindow::WINDOW_NAME = "main_window";
 
-MainWindow::MainWindow(Gui* gui) : Window(gui, MainWindow::WINDOW_NAME),
-								   SETTINGS_FILE("gui/gui_settings.xml"),
-								   streamControls(this),
-								   viewOptionsControls(this),
-								   newRoundDispatcher(sigc::mem_fun(*this, &MainWindow::cbNewRound)),
-								   newCalculatedResultDispatcher(sigc::mem_fun(*this, &MainWindow::cbNewCalculatedResult)),
-								   packetReceiverDestroyedDispatcher(sigc::mem_fun(*this, &MainWindow::cbPacketReceiverDestroyed)),
-								   imageSaverDestroyedDispatcher(sigc::mem_fun(*this, &MainWindow::cbImageSaverDestroyed)),
-								   videoWriterDestroyedDispatcher(sigc::mem_fun(*this, &MainWindow::cbVideoWriterDestroyed)),
-								   perspectiveCalculatedDispatcher(sigc::mem_fun(*this, &MainWindow::cbPerspectiveCalculated))
+MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
+		Window(gui, MainWindow::WINDOW_NAME),
+	    SETTINGS_FILE("gui/gui_settings.xml"),
+	    streamControls(this),
+	    viewOptionsControls(this),
+	    newRoundDispatcher(sigc::mem_fun(*this, &MainWindow::cbNewRound)),
+	    newCalculatedResultDispatcher(sigc::mem_fun(*this, &MainWindow::cbNewCalculatedResult)),
+	    packetReceiverDestroyedDispatcher(sigc::mem_fun(*this, &MainWindow::cbPacketReceiverDestroyed)),
+	    statisticWindowHiddenDispatcher(sigc::mem_fun(*this, &MainWindow::cbStatisticWindowHidden)),
+	    frameWindowHiddenDispatcher(sigc::mem_fun(*this, &MainWindow::cbFrameWindowHidden)),
+	    imageSaverDestroyedDispatcher(sigc::mem_fun(*this, &MainWindow::cbImageSaverDestroyed)),
+	    videoWriterDestroyedDispatcher(sigc::mem_fun(*this, &MainWindow::cbVideoWriterDestroyed)),
+	    perspectiveCalculatedDispatcher(sigc::mem_fun(*this, &MainWindow::cbPerspectiveCalculated))
 {
 	packetReceiver = NULL;
+	statisticWindow = sw;
+	frameWindow = fw;
 	setUpWindow();
 	setUpCallbacks();
 
@@ -86,6 +130,9 @@ MainWindow::MainWindow(Gui* gui) : Window(gui, MainWindow::WINDOW_NAME),
 	viewPerspectiveCalculationChecked = false;
 	viewNullPosCalculationChecked = false;
 	viewBallPosCalculationChecked = false;
+
+	frameWindow->setVisible(viewFrameWindowChecked);
+	statisticWindow->setVisible(viewStatisticWindowChecked);
 
 	try
 	{
@@ -200,11 +247,13 @@ void MainWindow::loadSettings()
 		{
 			settings[STR_SETTING_VIEW_FRAME_WINDOW] >> viewFrameWindowChecked;
 			viewOptionsControls.view_frame_window->set_active(viewFrameWindowChecked);
+			frameWindow->setVisible(viewFrameWindowChecked);
 		}
 		if (settings[STR_SETTING_VIEW_STATISTIC_WINDOW].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_STATISTIC_WINDOW] >> viewStatisticWindowChecked;
 			viewOptionsControls.view_statistic_window->set_active(viewStatisticWindowChecked);
+			statisticWindow->setVisible(viewStatisticWindowChecked);
 		}
 		if (settings[STR_SETTING_VIEW_CALCULATED_PERSPECTIVE].type() == cv::FileNode::INT)
 		{
@@ -352,6 +401,26 @@ void MainWindow::cbPacketReceiverDestroyed()
 	streamControls.btn_stop_stream->set_sensitive(false);
 }
 
+void MainWindow::cbFrameWindowHidden()
+{
+	controlValueMutex.lock();
+	viewFrameWindowChecked = false;
+	bool view = viewFrameWindowChecked;
+	controlValueMutex.unlock();
+	// Muss wieder entlockt werden, sonst Deadlock
+	viewOptionsControls.view_frame_window->set_active(view);
+}
+
+void MainWindow::cbStatisticWindowHidden()
+{
+	controlValueMutex.lock();
+	viewStatisticWindowChecked = false;
+	bool view = viewStatisticWindowChecked;
+	controlValueMutex.unlock();
+	// Muss wieder entlockt werden, sonst Deadlock
+	viewOptionsControls.view_statistic_window->set_active(view);
+}
+
 void MainWindow::cbImageSaverDestroyed()
 {
 	// todo
@@ -386,6 +455,16 @@ void MainWindow::notifyPackerReceiverDestroyed()
 	packetReceiverDestroyedDispatcher.notify();
 }
 
+void MainWindow::notifyFrameWindowHidden()
+{
+	frameWindowHiddenDispatcher.notify();
+}
+
+void MainWindow::notifyStatisticWindowHidden()
+{
+	statisticWindowHiddenDispatcher.notify();
+}
+
 
 const std::string StatisticWindow::GLADE_FILE = "gui/statistic_window.glade";
 const std::string StatisticWindow::WINDOW_NAME = "statistic_window";
@@ -393,11 +472,46 @@ const std::string StatisticWindow::WINDOW_NAME = "statistic_window";
 StatisticWindow::StatisticWindow(Gui* gui) :
 		Window(gui, StatisticWindow::WINDOW_NAME)
 {
+	mainWindow = NULL;
+	statistic_img = NULL;
+	setUpWindow();
 	setUpCallbacks();
 	// todo
 }
 
+void StatisticWindow::setVisible(bool v)
+{
+	if (v)
+	{
+		window->show_all();
+	}
+	else
+	{
+		window->hide();
+	}
+}
+
+void StatisticWindow::setMainWindow(MainWindow* mainWindow)
+{
+	this->mainWindow = mainWindow;
+}
+
+void StatisticWindow::setUpWindow()
+{
+	Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_file(GLADE_FILE);
+	Window::setUpWindow(builder);
+	builder->get_widget("statistic_img", statistic_img);
+}
+
 void StatisticWindow::setUpCallbacks()
 {
-	// todo
+	window->signal_hide().connect(sigc::mem_fun(*this, &StatisticWindow::cbWindowHidden));
+}
+
+void StatisticWindow::cbWindowHidden()
+{
+	if (mainWindow != NULL)
+	{
+		mainWindow->notifyStatisticWindowHidden();
+	}
 }

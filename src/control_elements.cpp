@@ -39,7 +39,6 @@ void ViewOptionsControls::setUpControlElements(const Glib::RefPtr<Gtk::Builder>&
 
 void ViewOptionsControls::setUpCallbacks()
 {
-
 	view_frame_window->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewFrameWindowToggled));
 	view_statistic_window->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewStatisticWindowToggled));
 	view_calculated_perspective->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewCalculatedPerspectiveToggled));
@@ -58,6 +57,7 @@ void ViewOptionsControls::cbViewFrameWindowToggled()
 {
 	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
 	mainWindow->viewFrameWindowChecked = view_frame_window->get_active();
+	mainWindow->frameWindow->setVisible(mainWindow->viewFrameWindowChecked);
 	// todo
 }
 
@@ -65,6 +65,7 @@ void ViewOptionsControls::cbViewStatisticWindowToggled()
 {
 	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
 	mainWindow->viewStatisticWindowChecked = view_statistic_window->get_active();
+	mainWindow->statisticWindow->setVisible(mainWindow->viewStatisticWindowChecked);
 	// todo
 }
 

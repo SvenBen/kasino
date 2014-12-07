@@ -74,6 +74,18 @@ MainWindow::MainWindow(Gui* gui) : Window(gui, MainWindow::WINDOW_NAME),
 	selectedServerIndex = streamControls.servers->get_active_row_number();
 	selectedServer = streamControls.servers->get_active_text();
 	selectedSlowmo = true;
+	viewFrameWindowChecked = false;
+	viewStatisticWindowChecked = false;
+	viewCalculatedPerspectiveChecked = false;
+	viewBallPositionChecked = false;
+	viewNullPositionChecked = false;
+	viewCrosshairChecked = false;
+	viewTimeSinceRoundStartChecked = false;
+	viewBallVelocityChecked = false;
+	viewPlateVelocityChecked = false;
+	viewPerspectiveCalculationChecked = false;
+	viewNullPosCalculationChecked = false;
+	viewBallPosCalculationChecked = false;
 
 	try
 	{
@@ -132,6 +144,7 @@ void MainWindow::loadSettings()
 	cv::FileStorage settings(SETTINGS_FILE, cv::FileStorage::READ);
 	if (settings.isOpened())
 	{
+		// Stream Settings
 		if (settings[STR_SETTING_SLOWMO].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_SLOWMO] >> selectedSlowmo;
@@ -182,6 +195,68 @@ void MainWindow::loadSettings()
 			selectedServer = streamControls.servers->get_active_text();
 		}
 
+		// ViewOptions Settings
+		if (settings[STR_SETTING_VIEW_FRAME_WINDOW].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_FRAME_WINDOW] >> viewFrameWindowChecked;
+			viewOptionsControls.view_frame_window->set_active(viewFrameWindowChecked);
+		}
+		if (settings[STR_SETTING_VIEW_STATISTIC_WINDOW].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_STATISTIC_WINDOW] >> viewStatisticWindowChecked;
+			viewOptionsControls.view_statistic_window->set_active(viewStatisticWindowChecked);
+		}
+		if (settings[STR_SETTING_VIEW_CALCULATED_PERSPECTIVE].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_CALCULATED_PERSPECTIVE] >> viewCalculatedPerspectiveChecked;
+			viewOptionsControls.view_calculated_perspective->set_active(viewCalculatedPerspectiveChecked);
+		}
+		if (settings[STR_SETTING_VIEW_BALL_POSITION].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_BALL_POSITION] >> viewBallPositionChecked;
+			viewOptionsControls.view_ball_position->set_active(viewBallPositionChecked);
+		}
+		if (settings[STR_SETTING_VIEW_NULL_POSITION].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_NULL_POSITION] >> viewNullPositionChecked;
+			viewOptionsControls.view_null_position->set_active(viewNullPositionChecked);
+		}
+		if (settings[STR_SETTING_VIEW_CROSSHAIR].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_CROSSHAIR] >> viewCrosshairChecked;
+			viewOptionsControls.view_crosshair->set_active(viewCrosshairChecked);
+		}
+		if (settings[STR_SETTING_VIEW_TIME_SINCE_ROUND_START].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_TIME_SINCE_ROUND_START] >> viewTimeSinceRoundStartChecked;
+			viewOptionsControls.view_time_since_round_start->set_active(viewTimeSinceRoundStartChecked);
+		}
+		if (settings[STR_SETTING_VIEW_BALL_VELOCITY].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_BALL_VELOCITY] >> viewBallVelocityChecked;
+			viewOptionsControls.view_ball_velocity->set_active(viewBallVelocityChecked);
+		}
+		if (settings[STR_SETTING_VIEW_PLATE_VELOCITY].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_PLATE_VELOCITY] >> viewPlateVelocityChecked;
+			viewOptionsControls.view_plate_velocity->set_active(viewPlateVelocityChecked);
+		}
+		if (settings[STR_SETTING_VIEW_PERSPECTIVE_CALCULATION].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_PERSPECTIVE_CALCULATION] >> viewPerspectiveCalculationChecked;
+			viewOptionsControls.view_perspective_calculation->set_active(viewPerspectiveCalculationChecked);
+		}
+		if (settings[STR_SETTING_VIEW_NULL_POS_CALCULATION].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_NULL_POS_CALCULATION] >> viewNullPosCalculationChecked;
+			viewOptionsControls.view_null_pos_calculation->set_active(viewNullPosCalculationChecked);
+		}
+		if (settings[STR_SETTING_VIEW_BALL_POS_CALCULATION].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_BALL_POS_CALCULATION] >> viewBallPosCalculationChecked;
+			viewOptionsControls.view_ball_pos_calculation->set_active(viewBallPosCalculationChecked);
+		}
+
 		// todo
 	}
 	else
@@ -198,15 +273,6 @@ void MainWindow::loadSettings()
 	video_record_path
 	image_record_path
 
-	view_calculated_perspective
-	view_ball_position
-	view_crosshair
-	view_time_since_round_start
-	view_ball_velocity
-	view_plate_velocity
-	view_perspective_calculation
-	view_ball_path
-
 	show_frame_window
 	show_statistic_window*/
 }
@@ -216,9 +282,24 @@ void MainWindow::saveSettings()
 	cv::FileStorage settings(SETTINGS_FILE, cv::FileStorage::WRITE);
 	if (settings.isOpened())
 	{
+		// Stream Settings
 		settings << STR_SETTING_SLOWMO << selectedSlowmo;
 		settings << STR_SETTING_QUALI << selectedStreamQuality;
 		settings << STR_SETTING_SERVER << streamControls.servers->get_active_row_number();
+
+		// ViewOptions Settings
+		settings << STR_SETTING_VIEW_FRAME_WINDOW << viewFrameWindowChecked;
+		settings << STR_SETTING_VIEW_STATISTIC_WINDOW << viewStatisticWindowChecked;
+		settings << STR_SETTING_VIEW_CALCULATED_PERSPECTIVE << viewCalculatedPerspectiveChecked;
+		settings << STR_SETTING_VIEW_BALL_POSITION << viewBallPositionChecked;
+		settings << STR_SETTING_VIEW_NULL_POSITION << viewNullPositionChecked;
+		settings << STR_SETTING_VIEW_CROSSHAIR << viewCrosshairChecked;
+		settings << STR_SETTING_VIEW_TIME_SINCE_ROUND_START << viewTimeSinceRoundStartChecked;
+		settings << STR_SETTING_VIEW_BALL_VELOCITY << viewBallVelocityChecked;
+		settings << STR_SETTING_VIEW_PLATE_VELOCITY << viewPlateVelocityChecked;
+		settings << STR_SETTING_VIEW_PERSPECTIVE_CALCULATION << viewPerspectiveCalculationChecked;
+		settings << STR_SETTING_VIEW_NULL_POS_CALCULATION << viewNullPosCalculationChecked;
+		settings << STR_SETTING_VIEW_BALL_POS_CALCULATION << viewBallPosCalculationChecked;
 
 		// todo
 	}

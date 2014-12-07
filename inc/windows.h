@@ -77,6 +77,7 @@ public:
 class MainWindow : Window
 {
 	friend class StreamControls;
+	friend class ViewOptionsControls;
 
 private:
 	static const std::string GLADE_FILE;
@@ -90,6 +91,18 @@ private:
 	std::string selectedServer;
 	int selectedServerIndex;
 	bool selectedSlowmo;
+	bool viewFrameWindowChecked;
+	bool viewStatisticWindowChecked;
+	bool viewCalculatedPerspectiveChecked;
+	bool viewBallPositionChecked;
+	bool viewNullPositionChecked;
+	bool viewCrosshairChecked;
+	bool viewTimeSinceRoundStartChecked;
+	bool viewBallVelocityChecked;
+	bool viewPlateVelocityChecked;
+	bool viewPerspectiveCalculationChecked;
+	bool viewNullPosCalculationChecked;
+	bool viewBallPosCalculationChecked;
 
 	// control elements
 	StreamControls streamControls;
@@ -110,12 +123,14 @@ private:
 
 	SharedUserObservationsPtr userObservations;
 	Glib::Threads::Mutex userObsMutex;
+	Glib::Threads::Mutex controlValueMutex;
 
 public:
 	MainWindow(Gui* gui);
 	virtual ~MainWindow();
 	Gtk::Window* getGtkWindow();
 	const SharedUserObservationsPtr getUserObservations();
+
 
 	void notifyPackerReceiverDestroyed();
 

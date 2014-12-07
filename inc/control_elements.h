@@ -39,7 +39,19 @@ private:
 	ViewOptionsControls(MainWindow* mainWindow);
 	void setUpControlElements(const Glib::RefPtr<Gtk::Builder>& builder);
 	void setUpCallbacks();
-	// todo callbacks
+
+	void cbViewFrameWindowToggled();
+	void cbViewStatisticWindowToggled();
+	void cbViewCalculatedPerspectiveToggled();
+	void cbViewBallPositionToggled();
+	void cbViewNullPositionToggled();
+	void cbViewCrosshairToggled();
+	void cbViewTimeSinceRoundStartToggled();
+	void cbViewBallVelocityToggled();
+	void cbViewPlateVelocityToggled();
+	void cbViewPerspectiveCalculationToggled();
+	void cbViewNullPosCalculationToggled();
+	void cbViewBallPosCalculationToggled();
 };
 
 class StreamControls

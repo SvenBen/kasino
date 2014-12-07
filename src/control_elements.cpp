@@ -23,18 +23,125 @@ ViewOptionsControls::ViewOptionsControls(MainWindow* mainWindow)
 
 void ViewOptionsControls::setUpControlElements(const Glib::RefPtr<Gtk::Builder>& builder)
 {
-	// todo
+	builder->get_widget("view_frame_window", view_frame_window);
+	builder->get_widget("view_statistic_window", view_statistic_window);
+	builder->get_widget("view_calculated_perspective", view_calculated_perspective);
+	builder->get_widget("view_ball_position", view_ball_position);
+	builder->get_widget("view_null_position", view_null_position);
+	builder->get_widget("view_crosshair", view_crosshair);
+	builder->get_widget("view_time_since_round_start", view_time_since_round_start);
+	builder->get_widget("view_ball_velocity", view_ball_velocity);
+	builder->get_widget("view_plate_velocity", view_plate_velocity);
+	builder->get_widget("view_perspective_calculation", view_perspective_calculation);
+	builder->get_widget("view_null_pos_calculation", view_null_pos_calculation);
+	builder->get_widget("view_ball_pos_calculation", view_ball_pos_calculation);
 }
 
 void ViewOptionsControls::setUpCallbacks()
 {
+
+	view_frame_window->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewFrameWindowToggled));
+	view_statistic_window->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewStatisticWindowToggled));
+	view_calculated_perspective->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewCalculatedPerspectiveToggled));
+	view_ball_position->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewBallPositionToggled));
+	view_null_position->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewNullPositionToggled));
+	view_crosshair->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewCrosshairToggled));
+	view_time_since_round_start->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewTimeSinceRoundStartToggled));
+	view_ball_velocity->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewBallVelocityToggled));
+	view_plate_velocity->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewPlateVelocityToggled));
+	view_perspective_calculation->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewPerspectiveCalculationToggled));
+	view_null_pos_calculation->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewNullPosCalculationToggled));
+	view_ball_pos_calculation->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewBallPosCalculationToggled));
+}
+
+void ViewOptionsControls::cbViewFrameWindowToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewFrameWindowChecked = view_frame_window->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewStatisticWindowToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewStatisticWindowChecked = view_statistic_window->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewCalculatedPerspectiveToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewCalculatedPerspectiveChecked = view_calculated_perspective->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewBallPositionToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewBallPositionChecked = view_ball_position->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewNullPositionToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewNullPositionChecked = view_null_position->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewCrosshairToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewCrosshairChecked = view_crosshair->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewTimeSinceRoundStartToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewTimeSinceRoundStartChecked = view_time_since_round_start->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewBallVelocityToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewBallVelocityChecked = view_ball_velocity->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewPlateVelocityToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewPlateVelocityChecked = view_plate_velocity->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewPerspectiveCalculationToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewPerspectiveCalculationChecked = view_perspective_calculation->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewNullPosCalculationToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewNullPosCalculationChecked = view_null_pos_calculation->get_active();
+	// todo
+}
+
+void ViewOptionsControls::cbViewBallPosCalculationToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewBallPosCalculationChecked = view_ball_pos_calculation->get_active();
 	// todo
 }
 
 
 StreamControls::StreamControls(MainWindow* mainWindow) : mainWindow(mainWindow)
 {
-	// Initialisierung der Controls im Konstruktor von Window() -> Window::setUpWindow() -> StreamControls::setUpControlElements()
+	// Initialisierung der Controls in MainWindow() -> setUpWindow() -> StreamControls::setUpControlElements()
 	servers = NULL;
 	quali_hd = NULL;
 	quali_high = NULL;

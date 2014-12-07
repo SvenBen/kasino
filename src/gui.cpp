@@ -6,7 +6,6 @@
  */
 
 #include "gui.h"
-#include "macros.h"
 
 Gui::Gui(Application* app) : app(app),
 							 statisticWindow(this),
@@ -14,13 +13,11 @@ Gui::Gui(Application* app) : app(app),
 							 statusWindow(this),
 							 mainWindow(this)
 {
-	packetReceiver = NULL;
 	// TODO
 }
 
 Gui::~Gui()
 {
-	SAFE_DELETE_NULL(packetReceiver)
 	// TODO Auto-generated destructor stub
 }
 

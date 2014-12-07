@@ -1,6 +1,7 @@
 
 #include "control_elements.h"
 #include "windows.h"
+#include "gui.h"
 
 
 ViewOptionsControls::ViewOptionsControls(MainWindow* mainWindow)
@@ -87,12 +88,16 @@ void StreamControls::cbSlowmoChanged()
 
 void StreamControls::cbStartStreamPressed()
 {
-	// todo mainWindow->gui->
+	// todo
+	btn_start_stream->set_sensitive(false);
+	btn_stop_stream->set_sensitive(true);
+	mainWindow->createPacketReceiver();
 }
 
 void StreamControls::cbStopStreamPressed()
 {
-	// todo
+	mainWindow->destroyPacketReceiver();
+	// die disable-Funktionen werden vom packetReceiverDestroyedDispatcher aufgerufen
 }
 
 void StreamControls::cbServerChanged()

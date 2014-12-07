@@ -7,14 +7,18 @@
 
 #include <packet_receiver.h>
 
-PacketReceiver::PacketReceiver()
+#include "windows.h"
+
+PacketReceiver::PacketReceiver(MainWindow* mainWindow)
 {
+	this->mainWindow = mainWindow;
 	// TODO Auto-generated constructor stub
 
 }
 
 PacketReceiver::~PacketReceiver()
 {
+	mainWindow->notifyPackerReceiverDestroyed();
 	// TODO Auto-generated destructor stub
 }
 

@@ -17,5 +17,16 @@ enum StreamQuality
 	QUALI_LOW
 };
 
+enum Perspective
+{
+	PERSPECTIVE_UNKNOWN = -1,
+	PERSPECTIVE_OTHER = 0,
+	PERSPECTIVE_1 = 1,
+	PERSPECTIVE_2 = 2,
+	PERSPECTIVE_3 = 3,
+	PERSPECTIVE_4 = 4,
+	PERSPECTIVE_5 = 5
+};
+
 
 #endif /* ENUM_TYPES_H_ */

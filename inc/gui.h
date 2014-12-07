@@ -12,14 +12,12 @@
 
 #include "windows.h"
 #include "logger.h"
-#include "packet_receiver.h"
 
 class Application;
 
 class Gui {
 private:
 	Application* app;
-	PacketReceiver* packetReceiver;
 	StatisticWindow statisticWindow;
 	FrameWindow frameWindow;
 	StatusWindow statusWindow;
@@ -37,6 +35,9 @@ public:
 	void notifyNewFrameAvailable();
 	void notifyNewStatisticAvailable();
 	void log(const std::string& msg);
+
+	void createPacketReceiver();
+	void destroyPacketReceiver();
 };
 
 #endif /* GUI_H_ */

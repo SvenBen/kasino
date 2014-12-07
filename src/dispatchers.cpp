@@ -1,4 +1,19 @@
 
+#include <assert.h>
+
 #include "dispatchers.h"
 
-// todo
+
+Dispatcher::Dispatcher(const sigc::slot<void>& slot)
+{
+	dispatcher.connect(slot);
+}
+
+Dispatcher::~Dispatcher()
+{
+}
+
+void Dispatcher::notify()
+{
+	dispatcher.emit();
+}

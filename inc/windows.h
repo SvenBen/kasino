@@ -19,6 +19,7 @@
 #include "queues.h"
 #include "queue_user.h"
 #include "control_elements.h"
+#include "packet_receiver.h"
 
 class Gui;
 
@@ -30,12 +31,11 @@ protected:
 	Gtk::Window* window;
 
 public:
-	Window(Gui* gui, const std::string& windowName, const std::string& glade_file);
+	Window(Gui* gui, const std::string& windowName);
 	virtual ~Window();
 
 protected:
 	virtual void setUpWindow(const Glib::RefPtr<Gtk::Builder>& builder);
-	virtual void setUpCallbacks();
 };
 
 class FrameWindow : Window
@@ -48,12 +48,15 @@ private:
 	static const std::string WINDOW_NAME;
 /*
 	Gtk::Image* frame_img;
-	NewFrameDispatcher newFrameDispatcher;
 */
+	ValueDispatcher<SharedFramePtr> newFrameDispatcher;
+
 public:
 	FrameWindow(Gui* gui);
-/*
+
 private:
+	void cbNewFrame();
+/*
 	virtual void setUpWindow(const Glib::RefPtr<Gtk::Builder>& builder);
 	virtual void setUpCallbacks();
 */
@@ -78,7 +81,9 @@ class MainWindow : Window
 private:
 	static const std::string GLADE_FILE;
 	static const std::string WINDOW_NAME;
-	const std::string SAVE_SETTINGS_FILE;
+	const std::string SETTINGS_FILE;
+
+	PacketReceiver* packetReceiver;
 
 	// Represent status of control elements
 	StreamQuality selectedStreamQuality;
@@ -94,12 +99,14 @@ private:
 	RecordControls recordControls;
 	AbcashenControls abcashenControls;*/
 
-	NewRoundDispatcher newRoundDispatcher;
-	NewCalculatedResultDispatcher newCalculatedResultDispatcher;
-	PacketReceiverDestroyedDispatcher packetReceiverDestroyedDispatcher;
-	ImageSaverDestroyedDispatcher imageSaverDestroyedDispatcher;
-	VideoWriterDestroyedDispatcher videoWriterDestroyedDispatcher;
-	PerspectiveCalculatedDispatcher perspectiveCalculatedDispatcher;
+	// dispatchers
+	ValueDispatcher<int> newRoundDispatcher;
+	ValueDispatcher<int> newCalculatedResultDispatcher;
+	Dispatcher packetReceiverDestroyedDispatcher;
+	Dispatcher imageSaverDestroyedDispatcher;
+	Dispatcher videoWriterDestroyedDispatcher;
+	ValueDispatcher<Perspective> perspectiveCalculatedDispatcher;
+
 	SharedUserObservationsPtr userObservations;
 	Glib::Threads::Mutex userObsMutex;
 
@@ -109,12 +116,24 @@ public:
 	Gtk::Window* getGtkWindow();
 	const SharedUserObservationsPtr getUserObservations();
 
+	void notifyPackerReceiverDestroyed();
+
 private:
-	virtual void setUpWindow(const Glib::RefPtr<Gtk::Builder>& builder);
+	virtual void setUpWindow();
 	virtual void setUpCallbacks();
-	void loadDefaultSettings();
-	void saveDefaultSettings();
-	void resetRoundObservations();
+	void loadSettings();
+	void saveSettings();
+	void resetUserObservations();
+
+	void cbNewRound();
+	void cbNewCalculatedResult();
+	void cbPacketReceiverDestroyed();
+	void cbImageSaverDestroyed();
+	void cbVideoWriterDestroyed();
+	void cbPerspectiveCalculated();
+
+	void createPacketReceiver();
+	void destroyPacketReceiver();
 };
 
 class StatisticWindow : Window
@@ -126,6 +145,8 @@ private:
 public:
 	StatisticWindow(Gui* gui);
 
+private:
+	void setUpCallbacks();
 	// todo
 };
 

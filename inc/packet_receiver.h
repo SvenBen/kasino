@@ -8,11 +8,16 @@
 #ifndef PACKET_RECEIVER_H_
 #define PACKET_RECEIVER_H_
 
+class MainWindow;
+
 class PacketReceiver
 {
+private:
+	MainWindow* mainWindow;
+
 	// todo
 public:
-	PacketReceiver();
+	PacketReceiver(MainWindow* mainWindow);
 	virtual ~PacketReceiver();
 };
 

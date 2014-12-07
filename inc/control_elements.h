@@ -8,6 +8,7 @@
 #ifndef CONTROL_ELEMENTS_H_
 #define CONTROL_ELEMENTS_H_
 
+#include <gtkmm/filechooserbutton.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/radiobutton.h>
@@ -78,6 +79,32 @@ private:
 	void cbStartStreamPressed();
 	void cbStopStreamPressed();
 	void cbServerChanged();
+};
+
+
+class RecordControls
+{
+	friend class MainWindow;
+
+private:
+	MainWindow* mainWindow;
+	Gtk::FileChooserButton* video_record_path;
+	Gtk::Button* video_record_start;
+	Gtk::Button* video_record_stop;
+	Gtk::FileChooserButton* image_record_path;
+	Gtk::Button* image_record_start;
+	Gtk::Button* image_record_stop;
+
+
+	RecordControls(MainWindow* mainWindow);
+	void setUpControlElements(const Glib::RefPtr<Gtk::Builder>& builder);
+	void setUpCallbacks();
+	void cbVideoRecordPathSet();
+	void cbVideoRecordStartClicked();
+	void cbVideoRecordStopClicked();
+	void cbImageRecordPathSet();
+	void cbImageRecordStartClicked();
+	void cbImageRecordStopClicked();
 };
 
 

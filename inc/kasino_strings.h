@@ -5,8 +5,8 @@
  *      Author: sven
  */
 
-#ifndef STRINGS_H_
-#define STRINGS_H_
+#ifndef KASINO_STRINGS_H_
+#define KASINO_STRINGS_H_
 
 #include <string>
 
@@ -25,10 +25,12 @@ const std::string STR_SETTING_VIEW_PLATE_VELOCITY = "VIEW_PLATE_VELOCITY";
 const std::string STR_SETTING_VIEW_PERSPECTIVE_CALCULATION = "VIEW_PERSPECTIVE_CALCULATION";
 const std::string STR_SETTING_VIEW_NULL_POS_CALCULATION = "VIEW_NULL_POS_CALCULATION";
 const std::string STR_SETTING_VIEW_BALL_POS_CALCULATION = "VIEW_BALL_POS_CALCULATION";
+const std::string STR_SETTING_VIDEO_RECORD_PATH = "VIDEO_RECORD_PATH";
+const std::string STR_SETTING_IMAGE_RECORD_PATH = "IMAGE_RECORD_PATH";
 
 
 const std::string STR_NOT_ENOUGH_SPACE = "Nicht genug Speicher";
 const std::string STR_ERR_READING_SETTINGS = "Fehler beim Lesen der Gui-Settings-Datei.";
 #define STR_CANNOT_OPEN_FILE(SETTINGS_FILE) std::string("Kann die Datei \"") + SETTINGS_FILE + "\" nicht öffnen"
 
-#endif /* STRINGS_H_ */
+#endif /* KASINO_STRINGS_H_ */

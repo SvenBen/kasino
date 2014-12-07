@@ -1,11 +1,13 @@
 
 #include <gtkmm/window.h>
 #include <assert.h>
+#include <iostream>
 
 #include "windows.h"
 #include "macros.h"
 #include "kasino_exception.h"
-#include "strings.h"
+#include "kasino_strings.h"
+#include "gui.h"
 
 Window::Window(Gui* gui, const std::string& windowName) :
 			WINDOW_NAME(windowName)
@@ -85,9 +87,46 @@ const std::string StatusWindow::GLADE_FILE = "gui/status_window.glade";
 const std::string StatusWindow::WINDOW_NAME = "status_window";
 
 StatusWindow::StatusWindow(Gui* gui) :
-		Window(gui, StatusWindow::WINDOW_NAME)
+		Window(gui, StatusWindow::WINDOW_NAME),
+		QueueHolder(deleteStringFreeFunc),
+		newStatusDispatcher(sigc::mem_fun(*this, &StatusWindow::cbNewStatus))
 {
-	// todo
+	setUpWindow();
+	window->show_all();
+}
+
+void StatusWindow::notifyNewStatus()
+{
+	newStatusDispatcher.notify();
+}
+
+void StatusWindow::setUpWindow()
+{
+	Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_file(GLADE_FILE);
+	Window::setUpWindow(builder);
+	builder->get_widget("status", status);
+}
+
+void StatusWindow::addToLog(const std::string& msg)
+{
+	Glib::RefPtr<Gtk::TextBuffer> buf = status->get_buffer();
+	buf->insert_at_cursor(msg + "\n");
+}
+
+void StatusWindow::cbNewStatus()
+{
+
+	while (true)
+	{
+		std::string* msg = try_pop();
+		if (msg == NULL)
+		{
+			break;
+		}
+
+		addToLog(*msg);
+		delete msg;
+	}
 }
 
 
@@ -99,6 +138,7 @@ MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
 	    SETTINGS_FILE("gui/gui_settings.xml"),
 	    streamControls(this),
 	    viewOptionsControls(this),
+	    recordControls(this),
 	    newRoundDispatcher(sigc::mem_fun(*this, &MainWindow::cbNewRound)),
 	    newCalculatedResultDispatcher(sigc::mem_fun(*this, &MainWindow::cbNewCalculatedResult)),
 	    packetReceiverDestroyedDispatcher(sigc::mem_fun(*this, &MainWindow::cbPacketReceiverDestroyed)),
@@ -109,6 +149,8 @@ MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
 	    perspectiveCalculatedDispatcher(sigc::mem_fun(*this, &MainWindow::cbPerspectiveCalculated))
 {
 	packetReceiver = NULL;
+	imageSaver = NULL;
+	videoWriter = NULL;
 	statisticWindow = sw;
 	frameWindow = fw;
 	setUpWindow();
@@ -140,12 +182,18 @@ MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
 	}
 	catch (KasinoException& e)
 	{
-		// todo log message
+		gui->log(e.what());
+	}
+	catch (cv::Exception& e)
+	{
+		gui->log(e.what());
 	}
 }
 
 MainWindow::~MainWindow()
 {
+	SAFE_DELETE_NULL(imageSaver)
+	SAFE_DELETE_NULL(videoWriter)
 	SAFE_DELETE_NULL(packetReceiver)
 	try
 	{
@@ -175,6 +223,7 @@ void MainWindow::setUpWindow()
 
 	streamControls.setUpControlElements(builder);
 	viewOptionsControls.setUpControlElements(builder);
+	recordControls.setUpControlElements(builder);
 	// todo
 }
 
@@ -182,6 +231,7 @@ void MainWindow::setUpCallbacks()
 {
 	streamControls.setUpCallbacks();
 	viewOptionsControls.setUpCallbacks();
+	recordControls.setUpCallbacks();
 	// todo
 
 }
@@ -306,6 +356,26 @@ void MainWindow::loadSettings()
 			viewOptionsControls.view_ball_pos_calculation->set_active(viewBallPosCalculationChecked);
 		}
 
+		// Record Settings
+		if (settings[STR_SETTING_VIDEO_RECORD_PATH].type() == cv::FileNode::STRING)
+		{
+			settings[STR_SETTING_VIDEO_RECORD_PATH] >> videoRecordPath;
+			recordControls.video_record_path->set_filename(videoRecordPath);
+		}
+		else
+		{
+			// todo log
+		}
+		if (settings[STR_SETTING_IMAGE_RECORD_PATH].type() == cv::FileNode::STRING)
+		{
+			settings[STR_SETTING_IMAGE_RECORD_PATH] >> imageRecordPath;
+			recordControls.image_record_path->set_filename(imageRecordPath);
+		}
+		else
+		{
+			// todo log
+		}
+
 		// todo
 	}
 	else
@@ -319,15 +389,13 @@ void MainWindow::loadSettings()
 	 * analyze
 	path_round_log_file
 
-	video_record_path
-	image_record_path
-
 	show_frame_window
 	show_statistic_window*/
 }
 
 void MainWindow::saveSettings()
 {
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
 	cv::FileStorage settings(SETTINGS_FILE, cv::FileStorage::WRITE);
 	if (settings.isOpened())
 	{
@@ -350,6 +418,10 @@ void MainWindow::saveSettings()
 		settings << STR_SETTING_VIEW_NULL_POS_CALCULATION << viewNullPosCalculationChecked;
 		settings << STR_SETTING_VIEW_BALL_POS_CALCULATION << viewBallPosCalculationChecked;
 
+		// Record Settings
+		settings << STR_SETTING_VIDEO_RECORD_PATH << videoRecordPath;
+		settings << STR_SETTING_IMAGE_RECORD_PATH << imageRecordPath;
+
 		// todo
 	}
 	else
@@ -363,20 +435,6 @@ void MainWindow::saveSettings()
 	 * analyze
 	path_round_log_file
 
-	video_record_path
-	image_record_path
-
-	view_calculated_perspective
-	view_ball_position
-	view_crosshair
-	view_time_since_round_start
-	view_ball_velocity
-	view_plate_velocity
-	view_perspective_calculation
-	view_ball_path
-
-	show_frame_window
-	show_statistic_window
 	*/
 }
 
@@ -423,12 +481,14 @@ void MainWindow::cbStatisticWindowHidden()
 
 void MainWindow::cbImageSaverDestroyed()
 {
-	// todo
+	recordControls.image_record_start->set_sensitive(true);
+	recordControls.image_record_stop->set_sensitive(false);
 }
 
 void MainWindow::cbVideoWriterDestroyed()
 {
-	// todo
+	recordControls.video_record_start->set_sensitive(true);
+	recordControls.video_record_stop->set_sensitive(false);
 }
 
 void MainWindow::cbPerspectiveCalculated()
@@ -450,9 +510,46 @@ void MainWindow::destroyPacketReceiver()
 	SAFE_DELETE_NULL(packetReceiver)
 }
 
-void MainWindow::notifyPackerReceiverDestroyed()
+void MainWindow::createImageSaver()
+{
+	imageSaver = new ImageSaver(this);
+	if (imageSaver == NULL)
+	{
+		throw KasinoException(STR_NOT_ENOUGH_SPACE);
+	}
+}
+void MainWindow::destroyImageSaver()
+{
+	SAFE_DELETE_NULL(imageSaver)
+}
+
+void MainWindow::createVideoWriter()
+{
+	videoWriter = new VideoWriter(this);
+	if (videoWriter == NULL)
+	{
+		throw KasinoException(STR_NOT_ENOUGH_SPACE);
+	}
+}
+
+void MainWindow::destroyVideoWriter()
+{
+	SAFE_DELETE_NULL(videoWriter)
+}
+
+void MainWindow::notifyPacketReceiverDestroyed()
 {
 	packetReceiverDestroyedDispatcher.notify();
+}
+
+void MainWindow::notifyImageSaverDestroyed()
+{
+	imageSaverDestroyedDispatcher.notify();
+}
+
+void MainWindow::notifyVideoWriterDestroyed()
+{
+	videoWriterDestroyedDispatcher.notify();
 }
 
 void MainWindow::notifyFrameWindowHidden()
@@ -463,6 +560,11 @@ void MainWindow::notifyFrameWindowHidden()
 void MainWindow::notifyStatisticWindowHidden()
 {
 	statisticWindowHiddenDispatcher.notify();
+}
+
+void MainWindow::log(const std::string& msg)
+{
+	gui->log(msg);
 }
 
 

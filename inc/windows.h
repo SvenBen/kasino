@@ -9,6 +9,7 @@
 #define WINDOWS_H_
 
 #include <gtkmm/image.h>
+#include <gtkmm/textview.h>
 #include <gtkmm/builder.h>
 #include <glibmm/threads.h>
 #include <string.h>
@@ -20,6 +21,9 @@
 #include "queue_user.h"
 #include "control_elements.h"
 #include "packet_receiver.h"
+#include "image_saver.h"
+#include "video_writer.h"
+#include "frame.h"
 
 class Gui;
 class StatisticWindow;
@@ -68,21 +72,29 @@ private:
 */
 };
 
-class StatusWindow : Window, QueueUser<StringQueue, std::string>
+class StatusWindow : Window, public QueueHolder<std::string*>
 {
 private:
 	static const std::string GLADE_FILE;
 	static const std::string WINDOW_NAME;
+	Gtk::TextView* status;
+	Dispatcher newStatusDispatcher;
 
 public:
 	StatusWindow(Gui* gui);
+	void notifyNewStatus();
 
+protected:
+	void setUpWindow();
+	void addToLog(const std::string& msg);
+	void cbNewStatus();
 	// todo
 };
 
 class MainWindow : Window
 {
 	friend class StreamControls;
+	friend class RecordControls;
 	friend class ViewOptionsControls;
 
 private:
@@ -91,6 +103,8 @@ private:
 	const std::string SETTINGS_FILE;
 
 	PacketReceiver* packetReceiver;
+	ImageSaver* imageSaver;
+	VideoWriter* videoWriter;
 	FrameWindow* frameWindow;
 	StatisticWindow* statisticWindow;
 
@@ -111,15 +125,15 @@ private:
 	bool viewPerspectiveCalculationChecked;
 	bool viewNullPosCalculationChecked;
 	bool viewBallPosCalculationChecked;
+	std::string videoRecordPath;
+	std::string imageRecordPath;
 
 	// control elements
 	StreamControls streamControls;
 	ViewOptionsControls viewOptionsControls;
-	/*
-	 * todo
-	 * DataRecordControls dataRecordControls;
+	/* todo DataRecordControls dataRecordControls;*/
 	RecordControls recordControls;
-	AbcashenControls abcashenControls;*/
+	/* todo AbcashenControls abcashenControls;*/
 
 	// dispatchers
 	ValueDispatcher<int> newRoundDispatcher;
@@ -138,12 +152,17 @@ private:
 public:
 	MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw);
 	virtual ~MainWindow();
+
 	Gtk::Window* getGtkWindow();
 	const SharedUserObservationsPtr getUserObservations();
 
-	void notifyPackerReceiverDestroyed();
+	void notifyPacketReceiverDestroyed();
+	void notifyImageSaverDestroyed();
+	void notifyVideoWriterDestroyed();
 	void notifyFrameWindowHidden();
 	void notifyStatisticWindowHidden();
+
+	void log(const std::string& msg);
 
 private:
 	virtual void setUpWindow();
@@ -163,6 +182,10 @@ private:
 
 	void createPacketReceiver();
 	void destroyPacketReceiver();
+	void createImageSaver();
+	void destroyImageSaver();
+	void createVideoWriter();
+	void destroyVideoWriter();
 };
 
 class StatisticWindow : Window

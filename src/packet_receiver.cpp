@@ -13,12 +13,13 @@ PacketReceiver::PacketReceiver(MainWindow* mainWindow)
 {
 	this->mainWindow = mainWindow;
 	// TODO Auto-generated constructor stub
-
+	mainWindow->log("Packet Receiver erstellt");
 }
 
 PacketReceiver::~PacketReceiver()
 {
-	mainWindow->notifyPackerReceiverDestroyed();
+	mainWindow->notifyPacketReceiverDestroyed();
+	mainWindow->log("Packet Receiver zerstört");
 	// TODO Auto-generated destructor stub
 }
 

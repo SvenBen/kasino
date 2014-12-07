@@ -8,9 +8,10 @@
 #include "application.h"
 #include "kasino_exception.h"
 
-Application::Application(int argc, char* argv[]) : APP_ID("kasino.app"),
-							 	 	 	 	 	   quitRequested(false)
+Application::Application(int argc, char* argv[]) : APP_ID("kasino.app")
 {
+	quitRequested = false;
+	running = false;
 	app = Gtk::Application::create(argc, argv, APP_ID);
 	gui = new Gui(this);
 	if (gui == NULL)
@@ -27,7 +28,21 @@ Application::~Application()
 
 void Application::run()
 {
+	setRunning(true);
 	app->run(*gui->getMainWindow());
+	setRunning(false);
+}
+
+void Application::setRunning(bool running)
+{
+	Glib::Threads::Mutex::Lock lock(runningMutex);
+	this->running = running;
+}
+
+bool Application::isRunning()
+{
+	Glib::Threads::Mutex::Lock lock(runningMutex);
+	return running;
 }
 
 void Application::setQuitRequested()

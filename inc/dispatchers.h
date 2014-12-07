@@ -25,7 +25,7 @@ public:
 };
 
 template <class T>
-class ValueDispatcher : Dispatcher
+class ValueDispatcher : public Dispatcher
 {
 protected:
 	Glib::Threads::Mutex mutex;

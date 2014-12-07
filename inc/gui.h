@@ -18,11 +18,11 @@ class Application;
 class Gui {
 private:
 	Application* app;
+	StatusWindow statusWindow;
+	Logger logger;
 	StatisticWindow statisticWindow;
 	FrameWindow frameWindow;
-	StatusWindow statusWindow;
 	MainWindow mainWindow;
-	Logger logger;
 
 public:
 	Gui(Application* app);

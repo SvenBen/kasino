@@ -10,15 +10,23 @@
 
 #include <string>
 
-#include "queue_holder.h"
 #include "queues.h"
 
-class Logger : QueueHolder<StringQueue, std::string>
+class StatusWindow;
+class Application;
+
+class Logger : public QueueUser<std::string*>
 {
+private:
+	StatusWindow* statusWindow;
+	Application* app;
 	// todo
 public:
-	Logger();
+	Logger(StatusWindow* statusWindow, Application* app);
 	virtual ~Logger();
+
+	void log(const std::string& msg);
 };
+
 
 #endif /* LOGGER_H_ */

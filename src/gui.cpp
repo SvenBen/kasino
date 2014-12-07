@@ -8,10 +8,12 @@
 #include "gui.h"
 
 Gui::Gui(Application* app) : app(app),
+							 statusWindow(this),
+							 logger(&statusWindow, app),
 							 statisticWindow(this),
 							 frameWindow(this),
-							 statusWindow(this),
 							 mainWindow(this, &frameWindow, &statisticWindow)
+
 {
 	frameWindow.setMainWindow(&mainWindow);
 	statisticWindow.setMainWindow(&mainWindow);
@@ -55,5 +57,5 @@ void Gui::notifyNewStatisticAvailable()
 
 void Gui::log(const std::string& msg)
 {
-	// todo
+	logger.log(msg);
 }

@@ -18,6 +18,8 @@ private:
 	const std::string APP_ID;
 	Gui* gui;
 	bool quitRequested;
+	bool running;
+	Glib::Threads::Mutex runningMutex;
 	Glib::Threads::Mutex quitMutex;
 	Glib::RefPtr<Gtk::Application> app;
 
@@ -26,8 +28,12 @@ public:
 	virtual ~Application();
 
 	void run();
+	bool isRunning();
 	void setQuitRequested();
 	bool getQuitRequested();
+
+private:
+	void setRunning(bool running);
 };
 
 #endif /* APPLICATION_H_ */

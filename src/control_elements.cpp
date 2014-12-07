@@ -140,9 +140,10 @@ void ViewOptionsControls::cbViewBallPosCalculationToggled()
 }
 
 
-StreamControls::StreamControls(MainWindow* mainWindow) : mainWindow(mainWindow)
+StreamControls::StreamControls(MainWindow* mainWindow)
 {
 	// Initialisierung der Controls in MainWindow() -> setUpWindow() -> StreamControls::setUpControlElements()
+	this->mainWindow = mainWindow;
 	servers = NULL;
 	quali_hd = NULL;
 	quali_high = NULL;
@@ -165,6 +166,7 @@ void StreamControls::setUpControlElements(const Glib::RefPtr<Gtk::Builder>& buil
 	builder->get_widget("slowmotion_off", slowmotion_off);
 	builder->get_widget("btn_start_stream", btn_start_stream);
 	builder->get_widget("btn_stop_stream", btn_stop_stream);
+	btn_stop_stream->set_sensitive(false);
 }
 
 void StreamControls::setUpCallbacks()
@@ -211,4 +213,77 @@ void StreamControls::cbServerChanged()
 {
 	mainWindow->selectedServer = servers->get_active_text();
 	mainWindow->selectedServerIndex = servers->get_active_row_number();
+}
+
+RecordControls::RecordControls(MainWindow* mainWindow)
+{
+	// Initialisierung der Controls in MainWindow() -> setUpWindow() -> RecordControls::setUpControlElements()
+	this->mainWindow = mainWindow;
+	video_record_path = NULL;
+	video_record_start = NULL;
+	video_record_stop = NULL;
+	image_record_path = NULL;
+	image_record_start = NULL;
+	image_record_stop = NULL;
+}
+
+void RecordControls::setUpControlElements(const Glib::RefPtr<Gtk::Builder>& builder)
+{
+	builder->get_widget("video_record_path", video_record_path);
+	builder->get_widget("video_record_start", video_record_start);
+	builder->get_widget("video_record_stop", video_record_stop);
+	builder->get_widget("image_record_path", image_record_path);
+	builder->get_widget("image_record_start", image_record_start);
+	builder->get_widget("image_record_stop", image_record_stop);
+
+	video_record_stop->set_sensitive(false);
+	image_record_stop->set_sensitive(false);
+}
+
+void RecordControls::setUpCallbacks()
+{
+	video_record_path->signal_file_set().connect(sigc::mem_fun(*this, &RecordControls::cbVideoRecordPathSet));
+	video_record_start->signal_clicked().connect(sigc::mem_fun(*this, &RecordControls::cbVideoRecordStartClicked));
+	video_record_stop->signal_clicked().connect(sigc::mem_fun(*this, &RecordControls::cbVideoRecordStopClicked));
+	image_record_path->signal_file_set().connect(sigc::mem_fun(*this, &RecordControls::cbImageRecordPathSet));
+	image_record_start->signal_clicked().connect(sigc::mem_fun(*this, &RecordControls::cbImageRecordStartClicked));
+	image_record_stop->signal_clicked().connect(sigc::mem_fun(*this, &RecordControls::cbImageRecordStopClicked));
+}
+
+void RecordControls::cbVideoRecordPathSet()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->videoRecordPath = video_record_path->get_filename();
+}
+
+void RecordControls::cbVideoRecordStartClicked()
+{
+	video_record_start->set_sensitive(false);
+	video_record_stop->set_sensitive(true);
+	mainWindow->createVideoWriter();
+}
+
+void RecordControls::cbVideoRecordStopClicked()
+{
+	mainWindow->destroyVideoWriter();
+	// die disable-Funktionen werden vom videoWriterDestroyedDispatcher aufgerufen
+}
+
+void RecordControls::cbImageRecordPathSet()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->imageRecordPath = image_record_path->get_filename();
+}
+
+void RecordControls::cbImageRecordStartClicked()
+{
+	image_record_start->set_sensitive(false);
+	image_record_stop->set_sensitive(true);
+	mainWindow->createImageSaver();
+}
+
+void RecordControls::cbImageRecordStopClicked()
+{
+	mainWindow->destroyImageSaver();
+	// die disable-Funktionen werden vom imageSaverDestroyedDispatcher aufgerufen
 }

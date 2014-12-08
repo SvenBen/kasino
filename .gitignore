@@ -28,3 +28,16 @@
 /Debug/src/windows.d
 /Debug/src/windows.o
 /Debug/kasino
+/Debug/src/image_saver.d
+/Debug/src/image_saver.o
+/Debug/src/video_writer.d
+/Debug/src/video_writer.o
+/gui/frame_window.glade~
+/gui/main_window.glade~
+/Debug/src/support.d
+/Debug/src/support.o
+/gui/status_window.glade~
+/Debug/src/frame_analysator.d
+/Debug/src/frame_analysator.o
+/Debug/src/thread.d
+/Debug/src/thread.o

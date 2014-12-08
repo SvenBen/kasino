@@ -6,6 +6,7 @@
  */
 
 #include "gui.h"
+#include "kasino_exception.h"
 
 Gui::Gui(Application* app) : app(app),
 							 statusWindow(this),
@@ -15,14 +16,23 @@ Gui::Gui(Application* app) : app(app),
 							 mainWindow(this, &frameWindow, &statisticWindow)
 
 {
+	frameAnalysator = new FrameAnalysator();
+	if (frameAnalysator == NULL)
+	{
+		throw NotEnoughSpaceException();
+	}
 	frameWindow.setMainWindow(&mainWindow);
 	statisticWindow.setMainWindow(&mainWindow);
-	// TODO
 }
 
 Gui::~Gui()
 {
-	// TODO Auto-generated destructor stub
+	delete frameAnalysator;
+}
+
+FrameAnalysator* Gui::getFrameAnalysator() const
+{
+	return frameAnalysator;
 }
 
 Gtk::Window* Gui::getMainWindow()

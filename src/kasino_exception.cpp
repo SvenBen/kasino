@@ -6,6 +6,7 @@
  */
 
 #include "kasino_exception.h"
+#include "kasino_strings.h"
 
 KasinoException::KasinoException() {
 }
@@ -21,4 +22,12 @@ KasinoException::KasinoException(const std::string& m)
 const std::string& KasinoException::what() const
 {
 	return msg;
+}
+
+NotEnoughSpaceException::NotEnoughSpaceException() : KasinoException(STR_NOT_ENOUGH_SPACE)
+{
+}
+
+NotEnoughSpaceException::~NotEnoughSpaceException()
+{
 }

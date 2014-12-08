@@ -13,6 +13,7 @@ Application::Application(int argc, char* argv[]) : APP_ID("kasino.app")
 	quitRequested = false;
 	running = false;
 	app = Gtk::Application::create(argc, argv, APP_ID);
+	// notwendig? Glib::thread_init();
 	gui = new Gui(this);
 	if (gui == NULL)
 	{

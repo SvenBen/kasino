@@ -10,7 +10,8 @@
 
 #include <string>
 
-class KasinoException {
+class KasinoException
+{
 private:
 	std::string msg;
 
@@ -20,6 +21,13 @@ public:
 	virtual ~KasinoException();
 
 	const std::string& what() const;
+};
+
+class NotEnoughSpaceException : public KasinoException
+{
+public:
+	NotEnoughSpaceException();
+	virtual ~NotEnoughSpaceException();
 };
 
 #endif /* KASINO_EXCEPTION_H_ */

@@ -589,7 +589,26 @@ void MainWindow::cbPerspectiveCalculated()
 
 void MainWindow::createPacketReceiver()
 {
-	packetReceiver = new PacketReceiver(this);
+	try
+	{
+		controlValueMutex.lock();
+		Stream stream(selectedStreamQuality, selectedSlowmo, selectedServer);
+		controlValueMutex.unlock();
+		packetReceiver = new PacketReceiver(stream, this, gui->getFrameAnalysator());
+		if (packetReceiver == NULL)
+		{
+			throw KasinoException(STR_NOT_ENOUGH_SPACE);
+		}
+	}
+	catch (Glib::Exception& e)
+	{
+		log(e.what(), ERROR);
+	}
+	catch (KasinoException& e)
+	{
+		log(e.what(), ERROR);
+	}
+
 	if (packetReceiver == NULL)
 	{
 		throw KasinoException(STR_NOT_ENOUGH_SPACE);

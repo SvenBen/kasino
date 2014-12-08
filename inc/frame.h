@@ -11,11 +11,20 @@
 #include <opencv2/core/core.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "enum_types.h"
+
 class Frame
 {
-	// todo
 public:
-	Frame();
+	cv::Mat mat;
+	Perspective perspective;
+	int roundNr;
+	int64_t pts;
+	int64_t timeSinceRoundStart;
+
+public:
+	Frame(const cv::Mat& mat);
+	Frame(const Frame& frame, const cv::Rect& roi);
 	virtual ~Frame();
 };
 

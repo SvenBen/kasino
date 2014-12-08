@@ -54,13 +54,16 @@ private:
 	static const std::string WINDOW_NAME;
 
 	Gtk::Image* frame_img;
-	ValueDispatcher<cv::Ptr<cv::Mat>> newFrameDispatcher;
+	ValueDispatcher<boost::shared_ptr<Frame>> newFrameDispatcher;
 	MainWindow* mainWindow;
+	Glib::Threads::Mutex visibleMutex;
+	bool visible;
 
 public:
 	FrameWindow(Gui* gui);
-	void notifyNewFrame(const cv::Ptr<cv::Mat>& sharedMat);
+	void notifyNewFrame(boost::shared_ptr<Frame> sharedFrame);
 	void setVisible(bool v);
+	bool getVisible();
 	void setMainWindow(MainWindow* mainWindow);
 
 private:
@@ -109,6 +112,7 @@ private:
 	VideoWriter* videoWriter;
 	FrameWindow* frameWindow;
 	StatisticWindow* statisticWindow;
+	FrameAnalysator* frameAnalysator;
 
 	// Represent status of control elements
 	StreamQuality selectedStreamQuality;

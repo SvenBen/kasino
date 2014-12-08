@@ -23,13 +23,11 @@ private:
 	StatisticWindow statisticWindow;
 	FrameWindow frameWindow;
 	MainWindow mainWindow;
-	FrameAnalysator* frameAnalysator;
 
 public:
 	Gui(Application* app);
 	virtual ~Gui();
 
-	FrameAnalysator* getFrameAnalysator() const;
 	Gtk::Window* getMainWindow();
 	void notifyCalculatedResultAvailable();
 	void notifyPacketReceiverAvailable();

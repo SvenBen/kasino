@@ -16,23 +16,12 @@ Gui::Gui(Application* app) : app(app),
 							 mainWindow(this, &frameWindow, &statisticWindow)
 
 {
-	frameAnalysator = new FrameAnalysator(&frameWindow);
-	if (frameAnalysator == NULL)
-	{
-		throw NotEnoughSpaceException();
-	}
 	frameWindow.setMainWindow(&mainWindow);
 	statisticWindow.setMainWindow(&mainWindow);
 }
 
 Gui::~Gui()
 {
-	delete frameAnalysator;
-}
-
-FrameAnalysator* Gui::getFrameAnalysator() const
-{
-	return frameAnalysator;
 }
 
 Gtk::Window* Gui::getMainWindow()

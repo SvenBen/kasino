@@ -9,6 +9,7 @@
 #include "kasino_exception.h"
 #include "windows.h"
 #include "kasino_strings.h"
+#include "frame.h"
 
 Stream::Stream(StreamQuality quali, bool withSlowmo, const std::string& serverIP)
 {
@@ -133,13 +134,16 @@ void PacketReceiver::threadFunc()
 							  ((AVPicture *)frameBGR)->data,
 							  ((AVPicture *)frameBGR)->linesize);
 
-					cv::Mat* imgCv = new cv::Mat();
-					if (imgCv == NULL)
+					cv::Mat imgCv;
+					frame2mat(*frameBGR, imgCv);
+					Frame* frame = new Frame(imgCv);
+					if (frame == NULL)
 					{
 						throw NotEnoughSpaceException();
 					}
-					frame2mat(*frameBGR, *imgCv);
-					push(imgCv);
+
+					frame->pts = 0; // todo welchen Wert hier reinziehen?
+					push(frame);
 				}
 			}
 		}

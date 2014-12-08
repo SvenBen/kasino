@@ -22,7 +22,7 @@ extern "C"
 #include "enum_types.h"
 #include "frame_analysator.h"
 
-
+class Frame;
 class MainWindow;
 
 class Stream
@@ -37,7 +37,7 @@ public:
 	std::string getStreamURL() const;
 };
 
-class PacketReceiver : public Thread, public QueueUser<cv::Mat*>
+class PacketReceiver : public Thread, public QueueUser<Frame*>
 {
 private:
 	MainWindow* mainWindow;

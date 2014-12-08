@@ -18,15 +18,17 @@ extern "C"
 #include "thread.h"
 #include "queues.h"
 
+class Frame;
 class Round;
+class Statistic;
 class FrameWindow;
 
-class FrameAnalysator : public Thread, public QueueHolder<cv::Mat*>
+class FrameAnalysator : public Thread, public QueueHolder<Frame*>
 {
 private:
 	Round* activeRound;
 	Round* lastRound;
-	cv::Mat* activeStatistic;
+	Statistic* activeStatistic;
 	FrameWindow* frameWindow;
 
 public:

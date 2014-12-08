@@ -6,9 +6,12 @@
  */
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include "frame_analysator.h"
 #include "windows.h"
+#include "frame.h"
+#include "statistic.h"
 
 FrameAnalysator::FrameAnalysator(FrameWindow* frameWindow) :
 	QueueHolder(deletePacketFreeFunc)
@@ -35,13 +38,25 @@ void FrameAnalysator::threadFunc()
 {
 	while (!quit)
 	{
-		cv::Mat* img = timeout_pop();
-
-		// show Frame
-		if (img != NULL)
+		Frame* orgFrame = timeout_pop();
+		if (orgFrame != NULL)
 		{
-			cv::Ptr<cv::Mat> sharedImg(img);
-			frameWindow->notifyNewFrame(sharedImg);
+			if (frameWindow->getVisible())
+			{
+				// This frame is for all manipulations
+				Frame manipulatedFrameBGR(*orgFrame);
+				manipulatedFrameBGR.mat = manipulatedFrameBGR.mat.clone();
+
+
+				// todo manipulate here
+
+
+				// Create a shared Frame in RGB
+				boost::shared_ptr<Frame> manipulatedFrameRGB(new Frame(manipulatedFrameBGR));
+				cv::cvtColor(manipulatedFrameRGB->mat, manipulatedFrameRGB->mat, CV_BGR2RGB);
+
+				frameWindow->notifyNewFrame(manipulatedFrameRGB);
+			}
 		}
 	}
 }

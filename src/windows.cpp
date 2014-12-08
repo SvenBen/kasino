@@ -39,17 +39,21 @@ FrameWindow::FrameWindow(Gui* gui) :
 {
 	mainWindow = NULL;
 	frame_img = NULL;
+	visible = false;
 	setUpWindow();
 	setUpCallbacks();
 }
 
-void FrameWindow::notifyNewFrame(const cv::Ptr<cv::Mat>& sharedMat)
+void FrameWindow::notifyNewFrame(boost::shared_ptr<Frame> sharedFrame)
 {
-	newFrameDispatcher.notify(sharedMat);
+	newFrameDispatcher.notify(sharedFrame);
 }
 
 void FrameWindow::setVisible(bool v)
 {
+	visibleMutex.lock();
+	visible = v;
+	visibleMutex.unlock();
 	if (v)
 	{
 		window->show_all();
@@ -58,6 +62,12 @@ void FrameWindow::setVisible(bool v)
 	{
 		window->hide();
 	}
+}
+
+bool FrameWindow::getVisible()
+{
+	Glib::Threads::Mutex::Lock lock(visibleMutex);
+	return visible;
 }
 
 void FrameWindow::setMainWindow(MainWindow* mainWindow)
@@ -78,10 +88,8 @@ void FrameWindow::setUpCallbacks()
 
 void FrameWindow::cbNewFrame()
 {
-	cv::Ptr<cv::Mat> sharedMatBGR = newFrameDispatcher.getValue();
-	cv::Mat matRGB;
-	cv::cvtColor(*sharedMatBGR, matRGB, CV_BGR2RGB);
-	frame_img->set(Gdk::Pixbuf::create_from_data(matRGB.data, Gdk::COLORSPACE_RGB, false, 8, matRGB.cols, matRGB.rows, matRGB.step));
+	boost::shared_ptr<Frame> sharedFrame = newFrameDispatcher.getValue();
+	frame_img->set(Gdk::Pixbuf::create_from_data(sharedFrame->mat.data, Gdk::COLORSPACE_RGB, false, 8, sharedFrame->mat.cols, sharedFrame->mat.rows, sharedFrame->mat.step));
 	frame_img->queue_draw();
 }
 
@@ -167,6 +175,12 @@ MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
 	setUpWindow();
 	setUpCallbacks();
 
+	frameAnalysator = new FrameAnalysator(frameWindow);
+	if (frameAnalysator == NULL)
+	{
+		throw NotEnoughSpaceException();
+	}
+
 	selectedStreamQuality = QUALI_HD;
 	selectedServerIndex = streamControls.servers->get_active_row_number();
 	selectedServer = streamControls.servers->get_active_text();
@@ -215,6 +229,7 @@ MainWindow::~MainWindow()
 	SAFE_DELETE_NULL(imageSaver)
 	SAFE_DELETE_NULL(videoWriter)
 	SAFE_DELETE_NULL(packetReceiver)
+	SAFE_DELETE_NULL(frameAnalysator)
 	try
 	{
 		saveSettings();
@@ -603,7 +618,7 @@ void MainWindow::createPacketReceiver()
 		controlValueMutex.lock();
 		Stream stream(selectedStreamQuality, selectedSlowmo, selectedServer);
 		controlValueMutex.unlock();
-		packetReceiver = new PacketReceiver(stream, this, gui->getFrameAnalysator());
+		packetReceiver = new PacketReceiver(stream, this, frameAnalysator);
 		if (packetReceiver == NULL)
 		{
 			throw KasinoException(STR_NOT_ENOUGH_SPACE);

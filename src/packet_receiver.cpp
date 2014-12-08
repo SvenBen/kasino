@@ -61,7 +61,7 @@ PacketReceiver::PacketReceiver(const Stream& stream,
 	frameBGRBuffer = NULL;
 	this->mainWindow = mainWindow;
 
-	thread = Glib::Threads::Thread::create(sigc::mem_fun(*this, &Thread::threadFunc));
+	thread = Glib::Threads::Thread::create(sigc::mem_fun(*this, &PacketReceiver::threadFunc));
 	// create() wirft Glib::Exception
 }
 
@@ -76,6 +76,20 @@ PacketReceiver::~PacketReceiver()
 	exit();
 	mainWindow->notifyPacketReceiverDestroyed();
 	mainWindow->log("Packet Receiver zerstört");
+}
+
+void PacketReceiver::frame2mat(const AVFrame& frameBGR, cv::Mat& matBGR)
+{
+	matBGR.create(codecCtx->height, codecCtx->width, CV_8UC(3));
+	for (int y = 0; y < codecCtx->height; y++)
+	{
+		for (int x = 0; x < codecCtx->width; x++)
+		{
+			matBGR.at<cv::Vec3b>(y, x)[0] = frameBGR.data[0][y * frameBGR.linesize[0] + x * 3 + 0];
+			matBGR.at<cv::Vec3b>(y, x)[1] = frameBGR.data[0][y * frameBGR.linesize[0] + x * 3 + 1];
+			matBGR.at<cv::Vec3b>(y, x)[2] = frameBGR.data[0][y * frameBGR.linesize[0] + x * 3 + 2];
+		}
+	}
 }
 
 void PacketReceiver::threadFunc()
@@ -119,14 +133,12 @@ void PacketReceiver::threadFunc()
 							  ((AVPicture *)frameBGR)->data,
 							  ((AVPicture *)frameBGR)->linesize);
 
-					cv::Mat* imgCv= new cv::Mat(frameBGR->height,
-												 frameBGR->width,
-												 CV_8UC3,
-												 frameBGR->data[0]);
+					cv::Mat* imgCv = new cv::Mat();
 					if (imgCv == NULL)
 					{
 						throw NotEnoughSpaceException();
 					}
+					frame2mat(*frameBGR, *imgCv);
 					push(imgCv);
 				}
 			}

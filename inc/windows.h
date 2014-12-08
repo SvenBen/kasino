@@ -54,11 +54,12 @@ private:
 	static const std::string WINDOW_NAME;
 
 	Gtk::Image* frame_img;
-	ValueDispatcher<SharedFramePtr> newFrameDispatcher;
+	ValueDispatcher<cv::Ptr<cv::Mat>> newFrameDispatcher;
 	MainWindow* mainWindow;
 
 public:
 	FrameWindow(Gui* gui);
+	void notifyNewFrame(const cv::Ptr<cv::Mat>& sharedMat);
 	void setVisible(bool v);
 	void setMainWindow(MainWindow* mainWindow);
 

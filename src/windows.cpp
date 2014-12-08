@@ -1,4 +1,5 @@
 
+#include <opencv2/imgproc/imgproc.hpp>
 #include <gtkmm/window.h>
 #include <assert.h>
 #include <iostream>
@@ -40,7 +41,11 @@ FrameWindow::FrameWindow(Gui* gui) :
 	frame_img = NULL;
 	setUpWindow();
 	setUpCallbacks();
-	// todo
+}
+
+void FrameWindow::notifyNewFrame(const cv::Ptr<cv::Mat>& sharedMat)
+{
+	newFrameDispatcher.notify(sharedMat);
 }
 
 void FrameWindow::setVisible(bool v)
@@ -73,7 +78,11 @@ void FrameWindow::setUpCallbacks()
 
 void FrameWindow::cbNewFrame()
 {
-	// todo
+	cv::Ptr<cv::Mat> sharedMatBGR = newFrameDispatcher.getValue();
+	cv::Mat matRGB;
+	cv::cvtColor(*sharedMatBGR, matRGB, CV_BGR2RGB);
+	frame_img->set(Gdk::Pixbuf::create_from_data(matRGB.data, Gdk::COLORSPACE_RGB, false, 8, matRGB.cols, matRGB.rows, matRGB.step));
+	frame_img->queue_draw();
 }
 
 void FrameWindow::cbWindowHidden()
@@ -607,11 +616,6 @@ void MainWindow::createPacketReceiver()
 	catch (KasinoException& e)
 	{
 		log(e.what(), ERROR);
-	}
-
-	if (packetReceiver == NULL)
-	{
-		throw KasinoException(STR_NOT_ENOUGH_SPACE);
 	}
 }
 

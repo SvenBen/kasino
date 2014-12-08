@@ -8,14 +8,17 @@
 #include <opencv2/core/core.hpp>
 
 #include "frame_analysator.h"
+#include "windows.h"
 
-FrameAnalysator::FrameAnalysator() :
+FrameAnalysator::FrameAnalysator(FrameWindow* frameWindow) :
 	QueueHolder(deletePacketFreeFunc)
 {
+	this->frameWindow = frameWindow;
 	activeRound = NULL;
+	lastRound = NULL;
 	activeStatistic = NULL;
-	// TODO Auto-generated constructor stub
 
+	thread = Glib::Threads::Thread::create(sigc::mem_fun(*this, &FrameAnalysator::threadFunc));
 }
 
 FrameAnalysator::~FrameAnalysator()
@@ -33,8 +36,13 @@ void FrameAnalysator::threadFunc()
 	while (!quit)
 	{
 		cv::Mat* img = timeout_pop();
-		delete img;
-		// todo
+
+		// show Frame
+		if (img != NULL)
+		{
+			cv::Ptr<cv::Mat> sharedImg(img);
+			frameWindow->notifyNewFrame(sharedImg);
+		}
 	}
 }
 

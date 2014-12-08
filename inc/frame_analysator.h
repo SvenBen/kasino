@@ -19,6 +19,7 @@ extern "C"
 #include "queues.h"
 
 class Round;
+class FrameWindow;
 
 class FrameAnalysator : public Thread, public QueueHolder<cv::Mat*>
 {
@@ -26,9 +27,10 @@ private:
 	Round* activeRound;
 	Round* lastRound;
 	cv::Mat* activeStatistic;
+	FrameWindow* frameWindow;
 
 public:
-	FrameAnalysator();
+	FrameAnalysator(FrameWindow* frameWindow);
 	virtual ~FrameAnalysator();
 
 private:

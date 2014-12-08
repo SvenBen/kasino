@@ -16,7 +16,7 @@ Gui::Gui(Application* app) : app(app),
 							 mainWindow(this, &frameWindow, &statisticWindow)
 
 {
-	frameAnalysator = new FrameAnalysator();
+	frameAnalysator = new FrameAnalysator(&frameWindow);
 	if (frameAnalysator == NULL)
 	{
 		throw NotEnoughSpaceException();

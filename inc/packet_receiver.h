@@ -57,6 +57,7 @@ public:
 	virtual ~PacketReceiver();
 
 private:
+	void frame2mat(const AVFrame& frameBGR, cv::Mat& matBGR);
 	virtual void threadFunc();
 	char* const avErr2Str(const int error);
 	void init();

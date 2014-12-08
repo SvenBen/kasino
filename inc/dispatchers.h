@@ -15,7 +15,7 @@
 
 class Dispatcher
 {
-private:
+protected:
 	Glib::Dispatcher dispatcher;
 
 public:
@@ -28,14 +28,14 @@ template <class T>
 class ValueDispatcher : public Dispatcher
 {
 protected:
-	Glib::Threads::Mutex mutex;
+	Glib::Threads::Mutex valueMutex;
 	T value; // kritisch, wird von mehreren Threads genutzt
 
 public:
 	ValueDispatcher(const sigc::slot<void>& slot);
 	virtual ~ValueDispatcher();
 	void notify(T value);
-	T getValue() const;
+	T getValue();
 };
 
 // Die Member-Funktionen müssen in der Header-Datei definiert werden, da
@@ -53,15 +53,15 @@ ValueDispatcher<T>::~ValueDispatcher()
 template <class T>
 void ValueDispatcher<T>::notify(T value)
 {
-	Glib::Threads::Mutex::Lock lock(mutex);
+	Glib::Threads::Mutex::Lock lock(valueMutex);
 	this->value = value;
 	dispatcher.emit();
 }
 
 template <class T>
-T ValueDispatcher<T>::getValue() const
+T ValueDispatcher<T>::getValue()
 {
-	Glib::Threads::Mutex::Lock lock(mutex);
+	Glib::Threads::Mutex::Lock lock(valueMutex);
 	return value;
 }
 

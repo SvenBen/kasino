@@ -22,11 +22,27 @@ Logger::~Logger()
 {
 }
 
-void Logger::log(const std::string& msg)
+void Logger::log(const std::string& msg, LogLevel logLevel)
 {
+	std::string strlevel;
+	switch (logLevel)
+	{
+	case INFO:
+		strlevel = "Info: ";
+		break;
+
+	case WARNING:
+		strlevel = "Warnung: ";
+		break;
+
+	case ERROR:
+		strlevel = "Error: ";
+		break;
+	}
+
 	if (app->isRunning())
 	{
-		std::string* copy = new std::string(msg);
+		std::string* copy = new std::string(strlevel + msg);
 		if (copy == NULL)
 			throw KasinoException(STR_NOT_ENOUGH_SPACE);
 
@@ -35,6 +51,6 @@ void Logger::log(const std::string& msg)
 	}
 	else
 	{
-		std::cerr << msg << std::endl;
+		std::cerr << strlevel << msg << std::endl;
 	}
 }

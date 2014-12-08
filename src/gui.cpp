@@ -55,7 +55,7 @@ void Gui::notifyNewStatisticAvailable()
 	// todo
 }
 
-void Gui::log(const std::string& msg)
+void Gui::log(const std::string& msg, LogLevel logLevel)
 {
-	logger.log(msg);
+	logger.log(msg, logLevel);
 }

@@ -2,6 +2,7 @@
 #include "control_elements.h"
 #include "windows.h"
 #include "gui.h"
+#include "user_observations.h"
 
 
 ViewOptionsControls::ViewOptionsControls(MainWindow* mainWindow)
@@ -286,4 +287,198 @@ void RecordControls::cbImageRecordStopClicked()
 {
 	mainWindow->destroyImageSaver();
 	// die disable-Funktionen werden vom imageSaverDestroyedDispatcher aufgerufen
+}
+
+
+DataRecordControls::DataRecordControls(MainWindow* mainWindow)
+{
+	this->mainWindow = mainWindow;
+	analyze = NULL;
+	record_round = NULL;
+	path_round_log_file = NULL;
+	round_nr = NULL;
+	perspective_nr = NULL;
+	rhombe_dont_know = NULL;
+	rhombe_n = NULL;
+	rhombe_no = NULL;
+	rhombe_o = NULL;
+	rhombe_so = NULL;
+	rhombe_s = NULL;
+	rhombe_sw = NULL;
+	rhombe_w = NULL;
+	rhombe_nw = NULL;
+	ball_direction_dont_know = NULL;
+	ball_direction_clockwise = NULL;
+	ball_direction_counterclockwise = NULL;
+	rhombe_hit_dont_know = NULL;
+	rhombe_hit_hard = NULL;
+	rhombe_hit_soft = NULL;
+	result_number = NULL;
+	btn_absage = NULL;
+	time_absage = NULL;
+	btn_delete_last_round = NULL;
+}
+void DataRecordControls::setUpControlElements(const Glib::RefPtr<Gtk::Builder>& builder)
+{
+	builder->get_widget("analyze", analyze);
+	builder->get_widget("record_round", record_round);
+	builder->get_widget("path_round_log_file", path_round_log_file);
+	builder->get_widget("round_nr", round_nr);
+	builder->get_widget("perspective_nr", perspective_nr);
+	builder->get_widget("rhombe_dont_know", rhombe_dont_know);
+	builder->get_widget("rhombe_n", rhombe_n);
+	builder->get_widget("rhombe_no", rhombe_no);
+	builder->get_widget("rhombe_o", rhombe_o);
+	builder->get_widget("rhombe_so", rhombe_so);
+	builder->get_widget("rhombe_s", rhombe_s);
+	builder->get_widget("rhombe_sw", rhombe_sw);
+	builder->get_widget("rhombe_w", rhombe_w);
+	builder->get_widget("rhombe_nw", rhombe_nw);
+	builder->get_widget("ball_direction_dont_know", ball_direction_dont_know);
+	builder->get_widget("ball_direction_clockwise", ball_direction_clockwise);
+	builder->get_widget("ball_direction_counterclockwise", ball_direction_counterclockwise);
+	builder->get_widget("rhombe_hit_dont_know", rhombe_hit_dont_know);
+	builder->get_widget("rhombe_hit_hard", rhombe_hit_hard);
+	builder->get_widget("rhombe_hit_soft", rhombe_hit_soft);
+	builder->get_widget("result_number", result_number);
+	builder->get_widget("btn_absage", btn_absage);
+	builder->get_widget("time_absage", time_absage);
+	builder->get_widget("btn_delete_last_round", btn_delete_last_round);
+}
+
+void DataRecordControls::setUpCallbacks()
+{
+	analyze->property_active().signal_changed().connect(sigc::mem_fun(*this, &DataRecordControls::cbAnalyzeActivated));
+	record_round->property_active().signal_changed().connect(sigc::mem_fun(*this, &DataRecordControls::cbRecordRoundActivated));
+	path_round_log_file->signal_file_set().connect(sigc::mem_fun(*this, &DataRecordControls::cbPathRoundLogFilePathSet));
+	rhombe_dont_know->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeChanged));
+	rhombe_n->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeChanged));
+	rhombe_no->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeChanged));
+	rhombe_o->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeChanged));
+	rhombe_so->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeChanged));
+	rhombe_s->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeChanged));
+	rhombe_sw->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeChanged));
+	rhombe_w->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeChanged));
+	rhombe_nw->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeChanged));
+	ball_direction_dont_know->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbBallDirectionChanged));
+	ball_direction_clockwise->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbBallDirectionChanged));
+	ball_direction_counterclockwise->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbBallDirectionChanged));
+	rhombe_hit_dont_know->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeHitChanged));
+	rhombe_hit_hard->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeHitChanged));
+	rhombe_hit_soft->signal_toggled().connect(sigc::mem_fun(*this, &DataRecordControls::cbRhombeHitChanged));
+	result_number->signal_value_changed().connect(sigc::mem_fun(*this, &DataRecordControls::cbResultNumberValueChanged));
+	btn_absage->signal_clicked().connect(sigc::mem_fun(*this, &DataRecordControls::cbAbsageClicked));
+	btn_delete_last_round->signal_clicked().connect(sigc::mem_fun(*this, &DataRecordControls::cbDeleteLastRoundClicked));
+}
+
+void DataRecordControls::cbAnalyzeActivated()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->analyze = analyze->get_active();
+	// todo
+}
+
+void DataRecordControls::cbRecordRoundActivated()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->recordRound = record_round->get_active();
+	// todo
+}
+
+void DataRecordControls::cbPathRoundLogFilePathSet()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->pathRoundLogFile = path_round_log_file->get_filename();
+	// todo
+}
+
+void DataRecordControls::cbRhombeChanged()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	if (rhombe_dont_know->get_active())
+	{
+		mainWindow->userObservations.rhombe = RHOMBE_DONT_KNOW;
+	}
+	else if (rhombe_n->get_active())
+	{
+		mainWindow->userObservations.rhombe = RHOMBE_N;
+	}
+	else if (rhombe_no->get_active())
+	{
+		mainWindow->userObservations.rhombe = RHOMBE_NO;
+	}
+	else if (rhombe_o->get_active())
+	{
+		mainWindow->userObservations.rhombe = RHOMBE_O;
+	}
+	else if (rhombe_so->get_active())
+	{
+		mainWindow->userObservations.rhombe = RHOMBE_SO;
+	}
+	else if (rhombe_s->get_active())
+	{
+		mainWindow->userObservations.rhombe = RHOMBE_S;
+	}
+	else if (rhombe_sw->get_active())
+	{
+		mainWindow->userObservations.rhombe = RHOMBE_SW;
+	}
+	else if (rhombe_w->get_active())
+	{
+		mainWindow->userObservations.rhombe = RHOMBE_W;
+	}
+	else if (rhombe_nw->get_active())
+	{
+		mainWindow->userObservations.rhombe = RHOMBE_NW;
+	}
+}
+
+void DataRecordControls::cbBallDirectionChanged()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	if (ball_direction_dont_know->get_active())
+	{
+		mainWindow->userObservations.ballDirection = BD_DONT_KNOW;
+	}
+	else if (ball_direction_clockwise->get_active())
+	{
+		mainWindow->userObservations.ballDirection = BD_CLOCKWISE;
+	}
+	else if (ball_direction_counterclockwise->get_active())
+	{
+		mainWindow->userObservations.ballDirection = BD_COUNTERCLOCKWISE;
+	}
+}
+
+void DataRecordControls::cbRhombeHitChanged()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	if (rhombe_hit_dont_know->get_active())
+	{
+		mainWindow->userObservations.hardness = H_DONT_KNOW;
+	}
+	else if (rhombe_hit_hard->get_active())
+	{
+		mainWindow->userObservations.hardness = H_HARD;
+	}
+	else if (rhombe_hit_soft->get_active())
+	{
+		mainWindow->userObservations.hardness = H_SOFT;
+	}
+}
+
+void DataRecordControls::cbResultNumberValueChanged()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->userObservations.resultNumber = result_number->get_value_as_int();
+}
+
+void DataRecordControls::cbAbsageClicked()
+{
+	// todo
+}
+
+void DataRecordControls::cbDeleteLastRoundClicked()
+{
+	// todo
 }

@@ -2,6 +2,7 @@
 #include <gtkmm/window.h>
 #include <assert.h>
 #include <iostream>
+#include <string>
 
 #include "windows.h"
 #include "macros.h"
@@ -139,6 +140,7 @@ MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
 	    streamControls(this),
 	    viewOptionsControls(this),
 	    recordControls(this),
+	    dataRecordControls(this),
 	    newRoundDispatcher(sigc::mem_fun(*this, &MainWindow::cbNewRound)),
 	    newCalculatedResultDispatcher(sigc::mem_fun(*this, &MainWindow::cbNewCalculatedResult)),
 	    packetReceiverDestroyedDispatcher(sigc::mem_fun(*this, &MainWindow::cbPacketReceiverDestroyed)),
@@ -172,6 +174,15 @@ MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
 	viewPerspectiveCalculationChecked = false;
 	viewNullPosCalculationChecked = false;
 	viewBallPosCalculationChecked = false;
+	videoRecordPath = "";
+	imageRecordPath = "";
+	userObservations.ballDirection = BD_DONT_KNOW;
+	userObservations.hardness = H_DONT_KNOW;
+	userObservations.rhombe = RHOMBE_DONT_KNOW;
+	userObservations.resultNumber = -1;
+	analyze = false;
+	recordRound = false;
+	pathRoundLogFile = "";
 
 	frameWindow->setVisible(viewFrameWindowChecked);
 	statisticWindow->setVisible(viewStatisticWindowChecked);
@@ -182,11 +193,11 @@ MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
 	}
 	catch (KasinoException& e)
 	{
-		gui->log(e.what());
+		gui->log(e.what(), WARNING);
 	}
 	catch (cv::Exception& e)
 	{
-		gui->log(e.what());
+		gui->log(e.what(), WARNING);
 	}
 }
 
@@ -210,9 +221,9 @@ Gtk::Window* MainWindow::getGtkWindow()
 	return window;
 }
 
-const SharedUserObservationsPtr MainWindow::getUserObservations()
+const UserObservations MainWindow::getUserObservations()
 {
-	Glib::Threads::Mutex::Lock lock(userObsMutex);
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
 	return userObservations;
 }
 
@@ -224,6 +235,7 @@ void MainWindow::setUpWindow()
 	streamControls.setUpControlElements(builder);
 	viewOptionsControls.setUpControlElements(builder);
 	recordControls.setUpControlElements(builder);
+	dataRecordControls.setUpControlElements(builder);
 	// todo
 }
 
@@ -232,8 +244,8 @@ void MainWindow::setUpCallbacks()
 	streamControls.setUpCallbacks();
 	viewOptionsControls.setUpCallbacks();
 	recordControls.setUpCallbacks();
+	dataRecordControls.setUpCallbacks();
 	// todo
-
 }
 
 void MainWindow::loadSettings()
@@ -253,6 +265,10 @@ void MainWindow::loadSettings()
 			{
 				streamControls.slowmotion_off->set_active();
 			}
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_SLOWMO + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 
 		if (settings[STR_SETTING_QUALI].type() == cv::FileNode::INT)
@@ -284,12 +300,20 @@ void MainWindow::loadSettings()
 				throw KasinoException(STR_ERR_READING_SETTINGS);
 			}
 		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_QUALI + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
 
 		if (settings[STR_SETTING_SERVER].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_SERVER] >> selectedServerIndex;
 			streamControls.servers->set_active(selectedServerIndex);
 			selectedServer = streamControls.servers->get_active_text();
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_SERVER + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 
 		// ViewOptions Settings
@@ -299,61 +323,109 @@ void MainWindow::loadSettings()
 			viewOptionsControls.view_frame_window->set_active(viewFrameWindowChecked);
 			frameWindow->setVisible(viewFrameWindowChecked);
 		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_FRAME_WINDOW + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
 		if (settings[STR_SETTING_VIEW_STATISTIC_WINDOW].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_STATISTIC_WINDOW] >> viewStatisticWindowChecked;
 			viewOptionsControls.view_statistic_window->set_active(viewStatisticWindowChecked);
 			statisticWindow->setVisible(viewStatisticWindowChecked);
 		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_STATISTIC_WINDOW + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
 		if (settings[STR_SETTING_VIEW_CALCULATED_PERSPECTIVE].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_CALCULATED_PERSPECTIVE] >> viewCalculatedPerspectiveChecked;
 			viewOptionsControls.view_calculated_perspective->set_active(viewCalculatedPerspectiveChecked);
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_CALCULATED_PERSPECTIVE + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 		if (settings[STR_SETTING_VIEW_BALL_POSITION].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_BALL_POSITION] >> viewBallPositionChecked;
 			viewOptionsControls.view_ball_position->set_active(viewBallPositionChecked);
 		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_BALL_POSITION + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
 		if (settings[STR_SETTING_VIEW_NULL_POSITION].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_NULL_POSITION] >> viewNullPositionChecked;
 			viewOptionsControls.view_null_position->set_active(viewNullPositionChecked);
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_NULL_POSITION + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 		if (settings[STR_SETTING_VIEW_CROSSHAIR].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_CROSSHAIR] >> viewCrosshairChecked;
 			viewOptionsControls.view_crosshair->set_active(viewCrosshairChecked);
 		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_CROSSHAIR + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
 		if (settings[STR_SETTING_VIEW_TIME_SINCE_ROUND_START].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_TIME_SINCE_ROUND_START] >> viewTimeSinceRoundStartChecked;
 			viewOptionsControls.view_time_since_round_start->set_active(viewTimeSinceRoundStartChecked);
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_TIME_SINCE_ROUND_START + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 		if (settings[STR_SETTING_VIEW_BALL_VELOCITY].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_BALL_VELOCITY] >> viewBallVelocityChecked;
 			viewOptionsControls.view_ball_velocity->set_active(viewBallVelocityChecked);
 		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_BALL_VELOCITY + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
 		if (settings[STR_SETTING_VIEW_PLATE_VELOCITY].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_PLATE_VELOCITY] >> viewPlateVelocityChecked;
 			viewOptionsControls.view_plate_velocity->set_active(viewPlateVelocityChecked);
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_PLATE_VELOCITY + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 		if (settings[STR_SETTING_VIEW_PERSPECTIVE_CALCULATION].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_PERSPECTIVE_CALCULATION] >> viewPerspectiveCalculationChecked;
 			viewOptionsControls.view_perspective_calculation->set_active(viewPerspectiveCalculationChecked);
 		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_PERSPECTIVE_CALCULATION + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
 		if (settings[STR_SETTING_VIEW_NULL_POS_CALCULATION].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_NULL_POS_CALCULATION] >> viewNullPosCalculationChecked;
 			viewOptionsControls.view_null_pos_calculation->set_active(viewNullPosCalculationChecked);
 		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_NULL_POS_CALCULATION + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
 		if (settings[STR_SETTING_VIEW_BALL_POS_CALCULATION].type() == cv::FileNode::INT)
 		{
 			settings[STR_SETTING_VIEW_BALL_POS_CALCULATION] >> viewBallPosCalculationChecked;
 			viewOptionsControls.view_ball_pos_calculation->set_active(viewBallPosCalculationChecked);
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_BALL_POS_CALCULATION + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 
 		// Record Settings
@@ -364,7 +436,7 @@ void MainWindow::loadSettings()
 		}
 		else
 		{
-			// todo log
+			log("Setting \"" + STR_SETTING_VIDEO_RECORD_PATH + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 		if (settings[STR_SETTING_IMAGE_RECORD_PATH].type() == cv::FileNode::STRING)
 		{
@@ -373,10 +445,29 @@ void MainWindow::loadSettings()
 		}
 		else
 		{
-			// todo log
+			log("Setting \"" + STR_SETTING_IMAGE_RECORD_PATH + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 
-		// todo
+		if (settings[STR_SETTING_ANALYZE].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_ANALYZE] >> analyze;
+			dataRecordControls.analyze->set_active(analyze);
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_ANALYZE + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
+
+		if (settings[STR_SETTING_PATH_ROUND_LOG_FILE].type() == cv::FileNode::STRING)
+		{
+			settings[STR_SETTING_PATH_ROUND_LOG_FILE] >> pathRoundLogFile;
+			dataRecordControls.path_round_log_file->set_filename(pathRoundLogFile);
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_PATH_ROUND_LOG_FILE + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
+
 	}
 	else
 	{
@@ -384,13 +475,6 @@ void MainWindow::loadSettings()
 	}
 
 	settings.release();
-
-	/*
-	 * analyze
-	path_round_log_file
-
-	show_frame_window
-	show_statistic_window*/
 }
 
 void MainWindow::saveSettings()
@@ -422,7 +506,9 @@ void MainWindow::saveSettings()
 		settings << STR_SETTING_VIDEO_RECORD_PATH << videoRecordPath;
 		settings << STR_SETTING_IMAGE_RECORD_PATH << imageRecordPath;
 
-		// todo
+		// DataRecord Settings
+		settings << STR_SETTING_ANALYZE << analyze;
+		settings << STR_SETTING_PATH_ROUND_LOG_FILE <<  pathRoundLogFile;
 	}
 	else
 	{
@@ -440,12 +526,17 @@ void MainWindow::saveSettings()
 
 void MainWindow::resetUserObservations()
 {
-	// todo
+	dataRecordControls.ball_direction_dont_know->set_active();
+	dataRecordControls.rhombe_dont_know->set_active();
+	dataRecordControls.rhombe_hit_dont_know->set_active();
+	dataRecordControls.result_number->set_value(-1);
 }
 
 void MainWindow::cbNewRound()
 {
-	// todo
+	resetUserObservations();
+	dataRecordControls.round_nr->set_text(std::to_string(newRoundDispatcher.getValue()));
+	dataRecordControls.perspective_nr->set_text("");
 }
 
 void MainWindow::cbNewCalculatedResult()
@@ -562,9 +653,14 @@ void MainWindow::notifyStatisticWindowHidden()
 	statisticWindowHiddenDispatcher.notify();
 }
 
-void MainWindow::log(const std::string& msg)
+void MainWindow::notifyNewRoundStarted(int round)
 {
-	gui->log(msg);
+	newRoundDispatcher.notify(round);
+}
+
+void MainWindow::log(const std::string& msg, LogLevel logLevel)
+{
+	gui->log(msg, logLevel);
 }
 
 

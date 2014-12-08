@@ -13,6 +13,8 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/button.h>
+#include <gtkmm/switch.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/builder.h>
 
 class Window;
@@ -105,6 +107,53 @@ private:
 	void cbImageRecordPathSet();
 	void cbImageRecordStartClicked();
 	void cbImageRecordStopClicked();
+};
+
+
+class DataRecordControls
+{
+	friend class MainWindow;
+
+private:
+	MainWindow* mainWindow;
+	Gtk::Switch* analyze;
+	Gtk::Switch* record_round;
+	Gtk::FileChooserButton* path_round_log_file;
+	Gtk::Label* round_nr;
+	Gtk::Label* perspective_nr;
+	Gtk::RadioButton* rhombe_dont_know;
+	Gtk::RadioButton* rhombe_n;
+	Gtk::RadioButton* rhombe_no;
+	Gtk::RadioButton* rhombe_o;
+	Gtk::RadioButton* rhombe_so;
+	Gtk::RadioButton* rhombe_s;
+	Gtk::RadioButton* rhombe_sw;
+	Gtk::RadioButton* rhombe_w;
+	Gtk::RadioButton* rhombe_nw;
+	Gtk::RadioButton* ball_direction_dont_know;
+	Gtk::RadioButton* ball_direction_clockwise;
+	Gtk::RadioButton* ball_direction_counterclockwise;
+	Gtk::RadioButton* rhombe_hit_dont_know;
+	Gtk::RadioButton* rhombe_hit_hard;
+	Gtk::RadioButton* rhombe_hit_soft;
+	Gtk::SpinButton* result_number;
+	Gtk::Button* btn_absage;
+	Gtk::Label* time_absage;
+	Gtk::Button* btn_delete_last_round;
+
+	DataRecordControls(MainWindow* mainWindow);
+	void setUpControlElements(const Glib::RefPtr<Gtk::Builder>& builder);
+	void setUpCallbacks();
+
+	void cbAnalyzeActivated();
+	void cbRecordRoundActivated();
+	void cbPathRoundLogFilePathSet();
+	void cbRhombeChanged();
+	void cbBallDirectionChanged();
+	void cbRhombeHitChanged();
+	void cbResultNumberValueChanged();
+	void cbAbsageClicked();
+	void cbDeleteLastRoundClicked();
 };
 
 

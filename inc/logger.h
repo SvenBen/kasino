@@ -15,17 +15,19 @@
 class StatusWindow;
 class Application;
 
+enum LogLevel { INFO, WARNING, ERROR };
+
 class Logger : public QueueUser<std::string*>
 {
 private:
 	StatusWindow* statusWindow;
 	Application* app;
-	// todo
+
 public:
 	Logger(StatusWindow* statusWindow, Application* app);
 	virtual ~Logger();
 
-	void log(const std::string& msg);
+	void log(const std::string& msg, LogLevel logLevel = INFO);
 };
 
 

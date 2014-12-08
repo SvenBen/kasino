@@ -24,6 +24,7 @@
 #include "image_saver.h"
 #include "video_writer.h"
 #include "frame.h"
+#include "logger.h"
 
 class Gui;
 class StatisticWindow;
@@ -88,13 +89,13 @@ protected:
 	void setUpWindow();
 	void addToLog(const std::string& msg);
 	void cbNewStatus();
-	// todo
 };
 
 class MainWindow : Window
 {
 	friend class StreamControls;
 	friend class RecordControls;
+	friend class DataRecordControls;
 	friend class ViewOptionsControls;
 
 private:
@@ -127,12 +128,16 @@ private:
 	bool viewBallPosCalculationChecked;
 	std::string videoRecordPath;
 	std::string imageRecordPath;
+	UserObservations userObservations;
+	bool analyze;
+	bool recordRound;
+	std::string pathRoundLogFile;
 
 	// control elements
 	StreamControls streamControls;
 	ViewOptionsControls viewOptionsControls;
-	/* todo DataRecordControls dataRecordControls;*/
 	RecordControls recordControls;
+	DataRecordControls dataRecordControls;
 	/* todo AbcashenControls abcashenControls;*/
 
 	// dispatchers
@@ -145,8 +150,6 @@ private:
 	Dispatcher videoWriterDestroyedDispatcher;
 	ValueDispatcher<Perspective> perspectiveCalculatedDispatcher;
 
-	SharedUserObservationsPtr userObservations;
-	Glib::Threads::Mutex userObsMutex;
 	Glib::Threads::Mutex controlValueMutex;
 
 public:
@@ -154,15 +157,16 @@ public:
 	virtual ~MainWindow();
 
 	Gtk::Window* getGtkWindow();
-	const SharedUserObservationsPtr getUserObservations();
+	const UserObservations getUserObservations();
 
 	void notifyPacketReceiverDestroyed();
 	void notifyImageSaverDestroyed();
 	void notifyVideoWriterDestroyed();
 	void notifyFrameWindowHidden();
 	void notifyStatisticWindowHidden();
+	void notifyNewRoundStarted(int round);
 
-	void log(const std::string& msg);
+	void log(const std::string& msg, LogLevel logLevel = INFO);
 
 private:
 	virtual void setUpWindow();

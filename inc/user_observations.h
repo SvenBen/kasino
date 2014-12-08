@@ -17,7 +17,7 @@ enum Hardness
 
 enum Rhombe
 {
-	RHOMBE_N, RHOMBE_NO, RHOMBE_O, RHOMBE_SO, RHOMBE_S, RHOMBE_SW, RHOMBE_W, RHOMBE_NW
+	RHOMBE_DONT_KNOW, RHOMBE_N, RHOMBE_NO, RHOMBE_O, RHOMBE_SO, RHOMBE_S, RHOMBE_SW, RHOMBE_W, RHOMBE_NW
 };
 
 enum BallDirection
@@ -31,8 +31,7 @@ public:
 	Rhombe rhombe;
 	Hardness hardness;
 	BallDirection ballDirection;
+	int resultNumber;
 } UserObservations;
-
-typedef boost::shared_ptr<UserObservations> SharedUserObservationsPtr;
 
 #endif /* USER_OBSERVATIONS_H_ */

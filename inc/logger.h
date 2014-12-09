@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include "queues.h"
+#include "queue_user.h"
 
 class StatusWindow;
 class Application;

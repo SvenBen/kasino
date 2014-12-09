@@ -10,7 +10,7 @@
 
 #include "thread.h"
 #include "frame.h"
-#include "queues.h"
+#include "queue_holder.h"
 
 class FrameAnalysator;
 class MainWindow;

@@ -17,7 +17,7 @@ std::string ImageSaver::lastSavePath = "";
 
 ImageSaver::ImageSaver(MainWindow* mainWindow,
 					   FrameAnalysator* frameAnalysator,
-					   const std::string & savePath)
+					   const std::string & savePath) : QueueHolder(deleteFrameFreeFunc)
 {
 	this->mainWindow = mainWindow;
 	this->frameAnalysator = frameAnalysator;

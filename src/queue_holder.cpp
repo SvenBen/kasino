@@ -1,18 +1,18 @@
 
 #include <opencv2/core/core.hpp>
-#include <string>
 
 extern "C"
 {
 	#include <libavformat/avformat.h>
-	#include <libavutil/avutil.h>
 }
 
-#include "round.h"
 #include "frame.h"
-#include "logger.h"
-#include "queues.h"
+#include "queue_holder.h"
 
+void deleteFrameFreeFunc(gpointer data)
+{
+	delete (Frame*)data;
+}
 
 void deletePacketFreeFunc(gpointer data)
 {

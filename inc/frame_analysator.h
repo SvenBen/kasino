@@ -16,7 +16,8 @@ extern "C"
 }
 
 #include "thread.h"
-#include "queues.h"
+#include "queue_user.h"
+#include "queue_holder.h"
 
 class ImageSaver;
 class Frame;

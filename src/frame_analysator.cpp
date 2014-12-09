@@ -15,11 +15,13 @@
 #include "macros.h"
 #include "image_saver.h"
 #include "video_writer.h"
+#include "mat_manipulator.h"
 
-FrameAnalysator::FrameAnalysator(FrameWindow* frameWindow) :
+FrameAnalysator::FrameAnalysator(FrameWindow* frameWindow, MainWindow* mainWindow) :
 	QueueHolder(deleteFrameFreeFunc)
 {
 	this->frameWindow = frameWindow;
+	this->mainWindow = mainWindow;
 	imgSaverQueueUser = NULL;
 	vidWriterQueueUser = NULL;
 	activeRound = NULL;
@@ -43,6 +45,7 @@ FrameAnalysator::~FrameAnalysator()
 
 void FrameAnalysator::createFramesForImgSaver(bool onOff, ImageSaver* imgSaver)
 {
+	Glib::Threads::Mutex::Lock lock(mutex);
 	if (onOff)
 	{
 		assert(imgSaver != NULL);
@@ -56,6 +59,7 @@ void FrameAnalysator::createFramesForImgSaver(bool onOff, ImageSaver* imgSaver)
 
 void FrameAnalysator::createFramesForVidWriter(bool onOff, VideoWriter* vidWriter)
 {
+	Glib::Threads::Mutex::Lock lock(mutex);
 	if (onOff)
 	{
 		assert(vidWriter != NULL);
@@ -74,15 +78,17 @@ void FrameAnalysator::threadFunc()
 		Frame* orgFrame = timeout_pop();
 		if (orgFrame != NULL)
 		{
+			orgFrame->timeSinceRoundStart = orgFrame->pts;
+
 			if (frameWindow->getVisible() || imgSaverQueueUser != NULL || vidWriterQueueUser != NULL)
 			{
-				// This frame is for all manipulations
+				// frameBGR is for all manipulations
 				Frame frameBGR(*orgFrame);
 				frameBGR.mat = orgFrame->mat.clone();
 
-
-				// todo manipulate here
-
+				// Write and draw infos in Mat
+				MatManipulator m(&frameBGR, mainWindow);
+				m.drawInfos();
 
 				// Create a shared Frame in RGB
 				Frame* frameRGB = new Frame(frameBGR);

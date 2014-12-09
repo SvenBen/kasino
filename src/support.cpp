@@ -7,9 +7,9 @@
 
 #include "support.h"
 
-const double Support::SCALE_FACTOR_HD2HIGH = 2/3;
-const double Support::SCALE_FACTOR_HD2MEDIUM = 0.5;
-const double Support::SCALE_FACTOR_HD2LOW = 0.5;
+const double Support::SCALE_HD2HIGH = 2.0/3.0;
+const double Support::SCALE_HD2MEDIUM = 0.5;
+const double Support::SCALE_HD2LOW = 0.5;
 
 Support::Support()
 {
@@ -25,7 +25,41 @@ Velocity Support::roundTime2Velocity(const RoundTime& rt)
 	// todo
 }
 
-cv::Point Support::calcPixelPosition(const cv::Point& posInHD, StreamQuality quali)
+double Support::getScaleFactor(StreamQuality quali)
 {
-	// todo
+	switch (quali)
+	{
+	case QUALI_HD:
+		return 1;
+
+	case QUALI_HIGH:
+		return Support::SCALE_HD2HIGH;
+
+	case QUALI_MEDIUM:
+		return Support::SCALE_HD2MEDIUM;
+
+	case QUALI_LOW:
+	default:
+		return Support::SCALE_HD2LOW;
+	}
+}
+
+cv::Point Support::calcScaledPoint(const cv::Point& inHD, StreamQuality quali)
+{
+	/*double scale = getScaleFactor(quali);
+	return scale * cv::Point(inHD.x, inHD.y);*/
+	return getScaleFactor(quali) * inHD;
+}
+
+cv::Rect Support::calcScaledRect(const cv::Rect& inHD, StreamQuality quali)
+{
+	double scale = getScaleFactor(quali);
+	return cv::Rect(cv::Point(scale * inHD.tl().x, scale * inHD.tl().y),
+					cv::Point(scale * inHD.br().x, scale * inHD.br().y));
+}
+
+cv::Size Support::calcScaledSize(const cv::Size& inHD, StreamQuality quali)
+{
+	double scale = getScaleFactor(quali);
+	return  cv::Size(scale * inHD.width, scale * inHD.height);
 }

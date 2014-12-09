@@ -29,11 +29,6 @@ public:
 	virtual ~Gui();
 
 	Gtk::Window* getMainWindow();
-	void notifyCalculatedResultAvailable();
-	void notifyPacketReceiverAvailable();
-	void notifyNewRound();
-	void notifyNewFrameAvailable();
-	void notifyNewStatisticAvailable();
 	void log(const std::string& msg, LogLevel logLevel = INFO);
 
 	void createPacketReceiver();

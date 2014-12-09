@@ -32,13 +32,11 @@ protected:
 template <class E>
 QueueHolder<E>::QueueHolder(GDestroyNotify free_func) : queue(free_func)
 {
-	// TODO Auto-generated constructor stub
 }
 
 template <class E>
 QueueHolder<E>::~QueueHolder()
 {
-	// TODO Auto-generated destructor stub
 }
 
 template <class E>

@@ -9,6 +9,7 @@
 #define LOGGER_H_
 
 #include <string>
+#include <glibmm/threads.h>
 
 #include "queue_user.h"
 
@@ -22,6 +23,7 @@ class Logger : public QueueUser<std::string*>
 private:
 	StatusWindow* statusWindow;
 	Application* app;
+	Glib::Threads::Mutex mutex;
 
 public:
 	Logger(StatusWindow* statusWindow, Application* app);

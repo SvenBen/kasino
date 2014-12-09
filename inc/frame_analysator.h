@@ -9,6 +9,7 @@
 #define FRAME_ANALYSATOR_H_
 
 #include <opencv2/core/core.hpp>
+#include <glibmm/threads.h>
 
 extern "C"
 {
@@ -25,6 +26,7 @@ class Frame;
 class Round;
 class Statistic;
 class FrameWindow;
+class MainWindow;
 
 class FrameAnalysator : public Thread, public QueueHolder<Frame*>
 {
@@ -33,11 +35,13 @@ private:
 	Round* lastRound;
 	Statistic* activeStatistic;
 	FrameWindow* frameWindow;
+	MainWindow* mainWindow;
 	QueueUser<Frame*>* imgSaverQueueUser;
 	QueueUser<Frame*>* vidWriterQueueUser;
+	Glib::Threads::Mutex mutex;
 
 public:
-	FrameAnalysator(FrameWindow* frameWindow);
+	FrameAnalysator(FrameWindow* frameWindow, MainWindow* mainWindow);
 	virtual ~FrameAnalysator();
 
 	void createFramesForImgSaver(bool onOff, ImageSaver* imgSaver = NULL);

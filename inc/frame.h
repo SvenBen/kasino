@@ -21,11 +21,15 @@ public:
 	int roundNr;
 	int64_t pts;
 	int64_t timeSinceRoundStart;
+	cv::Point nullPosition;
+	cv::Point ballPosition;
+	double ballRoundTime;
+	double plateRoundTime;
+	StreamQuality quali;
 
 public:
 	Frame(const cv::Mat& mat);
 	Frame(const Frame& frame, const cv::Rect& roi);
-	virtual ~Frame();
 };
 
 typedef boost::shared_ptr<Frame> SharedFramePtr;

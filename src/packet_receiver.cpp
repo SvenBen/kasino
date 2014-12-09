@@ -25,6 +25,7 @@ std::string Stream::getStreamURL() const
 	{
 		strCamQuali += "cam5_";
 	}
+
 	switch (quali)
 	{
 	case QUALI_HD:
@@ -42,9 +43,18 @@ std::string Stream::getStreamURL() const
 	case QUALI_LOW:
 		strCamQuali += "low";
 		break;
+
+	case QUALI_UNKNOWN:
+	default:
+		assert(0);
 	}
 
 	return "rtmp://" + serverIP + ":1935/casino/" + strCamQuali + " live=1";
+}
+
+StreamQuality Stream::getQuali() const
+{
+	return quali;
 }
 
 PacketReceiver::PacketReceiver(const Stream& stream,
@@ -142,7 +152,8 @@ void PacketReceiver::threadFunc()
 						throw NotEnoughSpaceException();
 					}
 
-					frame->pts = 0; // todo welchen Wert hier reinziehen?
+					frame->pts = frameReceived->pkt_pts; // todo welchen Wert hier reinziehen?
+					frame->quali = stream.getQuali();
 					push(frame);
 				}
 			}

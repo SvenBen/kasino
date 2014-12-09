@@ -35,6 +35,7 @@ private:
 public:
 	Stream(StreamQuality quali, bool withSlowmo, const std::string& serverIP);
 	std::string getStreamURL() const;
+	StreamQuality getQuali() const;
 };
 
 class PacketReceiver : public Thread, public QueueUser<Frame*>

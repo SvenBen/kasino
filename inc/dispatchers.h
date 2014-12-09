@@ -20,7 +20,6 @@ protected:
 
 public:
 	Dispatcher(const sigc::slot<void>& slot);
-	virtual ~Dispatcher();
 	void notify();
 };
 

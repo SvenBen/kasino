@@ -24,6 +24,7 @@ Logger::~Logger()
 
 void Logger::log(const std::string& msg, LogLevel logLevel)
 {
+	Glib::Threads::Mutex::Lock lock(mutex);
 	std::string strlevel;
 	switch (logLevel)
 	{
@@ -44,7 +45,7 @@ void Logger::log(const std::string& msg, LogLevel logLevel)
 	{
 		std::string* copy = new std::string(strlevel + msg);
 		if (copy == NULL)
-			throw KasinoException(STR_NOT_ENOUGH_SPACE);
+			throw NotEnoughSpaceException();
 
 		push(copy);
 		statusWindow->notifyNewStatus();

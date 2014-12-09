@@ -11,6 +11,7 @@
 
 enum StreamQuality
 {
+	QUALI_UNKNOWN,
 	QUALI_HD,
 	QUALI_HIGH,
 	QUALI_MEDIUM,

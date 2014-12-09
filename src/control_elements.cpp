@@ -11,6 +11,7 @@ ViewOptionsControls::ViewOptionsControls(MainWindow* mainWindow)
 	view_frame_window = NULL;
 	view_statistic_window = NULL;
 	view_calculated_perspective = NULL;
+	view_round_nr = NULL;
 	view_ball_position = NULL;
 	view_null_position = NULL;
 	view_crosshair = NULL;
@@ -27,6 +28,7 @@ void ViewOptionsControls::setUpControlElements(const Glib::RefPtr<Gtk::Builder>&
 	builder->get_widget("view_frame_window", view_frame_window);
 	builder->get_widget("view_statistic_window", view_statistic_window);
 	builder->get_widget("view_calculated_perspective", view_calculated_perspective);
+	builder->get_widget("view_round_nr", view_round_nr);
 	builder->get_widget("view_ball_position", view_ball_position);
 	builder->get_widget("view_null_position", view_null_position);
 	builder->get_widget("view_crosshair", view_crosshair);
@@ -43,6 +45,7 @@ void ViewOptionsControls::setUpCallbacks()
 	view_frame_window->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewFrameWindowToggled));
 	view_statistic_window->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewStatisticWindowToggled));
 	view_calculated_perspective->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewCalculatedPerspectiveToggled));
+	view_round_nr->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewRoundNrToggled));
 	view_ball_position->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewBallPositionToggled));
 	view_null_position->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewNullPositionToggled));
 	view_crosshair->signal_toggled().connect(sigc::mem_fun(*this, &ViewOptionsControls::cbViewCrosshairToggled));
@@ -75,6 +78,12 @@ void ViewOptionsControls::cbViewCalculatedPerspectiveToggled()
 	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
 	mainWindow->viewCalculatedPerspectiveChecked = view_calculated_perspective->get_active();
 	// todo
+}
+
+void ViewOptionsControls::cbViewRoundNrToggled()
+{
+	Glib::Threads::Mutex::Lock lock(mainWindow->controlValueMutex);
+	mainWindow->viewRoundNrChecked = view_round_nr->get_active();
 }
 
 void ViewOptionsControls::cbViewBallPositionToggled()

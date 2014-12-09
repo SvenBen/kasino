@@ -29,6 +29,7 @@ private:
 	Gtk::CheckButton* view_frame_window;
 	Gtk::CheckButton* view_statistic_window;
 	Gtk::CheckButton* view_calculated_perspective;
+	Gtk::CheckButton* view_round_nr;
 	Gtk::CheckButton* view_ball_position;
 	Gtk::CheckButton* view_null_position;
 	Gtk::CheckButton* view_crosshair;
@@ -46,6 +47,7 @@ private:
 	void cbViewFrameWindowToggled();
 	void cbViewStatisticWindowToggled();
 	void cbViewCalculatedPerspectiveToggled();
+	void cbViewRoundNrToggled();
 	void cbViewBallPositionToggled();
 	void cbViewNullPositionToggled();
 	void cbViewCrosshairToggled();

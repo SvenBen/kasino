@@ -46,9 +46,6 @@ protected:
 
 class FrameWindow : Window
 {
-/*
- * todo
- * */
 private:
 	static const std::string GLADE_FILE;
 	static const std::string WINDOW_NAME;
@@ -71,10 +68,6 @@ private:
 	void setUpCallbacks();
 	void cbNewFrame();
 	void cbWindowHidden();
-/*
-	virtual void setUpWindow(const Glib::RefPtr<Gtk::Builder>& builder);
-	virtual void setUpCallbacks();
-*/
 };
 
 class StatusWindow : Window, public QueueHolder<std::string*>
@@ -122,6 +115,7 @@ private:
 	bool viewFrameWindowChecked;
 	bool viewStatisticWindowChecked;
 	bool viewCalculatedPerspectiveChecked;
+	bool viewRoundNrChecked;
 	bool viewBallPositionChecked;
 	bool viewNullPositionChecked;
 	bool viewCrosshairChecked;
@@ -163,6 +157,17 @@ public:
 
 	Gtk::Window* getGtkWindow();
 	const UserObservations getUserObservations();
+	bool viewCalculatedPerspective();
+	bool viewRoundNr();
+	bool viewBallPosition();
+	bool viewNullPosition();
+	bool viewCrosshair();
+	bool viewTimeSinceRoundStart();
+	bool viewBallVelocity();
+	bool viewPlateVelocity();
+	bool viewPerspectiveCalculation();
+	bool viewNullPosCalculation();
+	bool viewBallPosCalculation();
 
 	void notifyPacketReceiverDestroyed();
 	void notifyImageSaverDestroyed();

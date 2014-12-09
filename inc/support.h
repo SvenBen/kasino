@@ -16,9 +16,9 @@
 class Support
 {
 private:
-	static const double SCALE_FACTOR_HD2HIGH;
-	static const double SCALE_FACTOR_HD2MEDIUM;
-	static const double SCALE_FACTOR_HD2LOW;
+	static const double SCALE_HD2HIGH;
+	static const double SCALE_HD2MEDIUM;
+	static const double SCALE_HD2LOW;
 
 private:
 	Support();
@@ -26,7 +26,10 @@ private:
 public:
 	static RoundTime velocity2RoundTime(const Velocity& v);
 	static Velocity roundTime2Velocity(const RoundTime& rt);
-	static cv::Point calcPixelPosition(const cv::Point& posInHD, StreamQuality quali);
+	static double getScaleFactor(StreamQuality quali);
+	static cv::Point calcScaledPoint(const cv::Point& inHD, StreamQuality quali);
+	static cv::Rect calcScaledRect(const cv::Rect& inHD, StreamQuality quali);
+	static cv::Size calcScaledSize(const cv::Size& inHD, StreamQuality quali);
 };
 
 #endif /* SUPPORT_H_ */

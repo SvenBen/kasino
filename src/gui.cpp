@@ -29,31 +29,6 @@ Gtk::Window* Gui::getMainWindow()
 	return mainWindow.getGtkWindow();
 }
 
-void Gui::notifyCalculatedResultAvailable()
-{
-	// todo
-}
-
-void Gui::notifyPacketReceiverAvailable()
-{
-	// todo
-}
-
-void Gui::notifyNewRound()
-{
-	// todo
-}
-
-void Gui::notifyNewFrameAvailable()
-{
-	// todo
-}
-
-void Gui::notifyNewStatisticAvailable()
-{
-	// todo
-}
-
 void Gui::log(const std::string& msg, LogLevel logLevel)
 {
 	logger.log(msg, logLevel);

@@ -51,9 +51,8 @@ void FrameWindow::notifyNewFrame(SharedFramePtr sharedFrame)
 
 void FrameWindow::setVisible(bool v)
 {
-	visibleMutex.lock();
+	Glib::Threads::Mutex::Lock lock(visibleMutex);
 	visible = v;
-	visibleMutex.unlock();
 	if (v)
 	{
 		window->show_all();
@@ -175,7 +174,7 @@ MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
 	setUpWindow();
 	setUpCallbacks();
 
-	frameAnalysator = new FrameAnalysator(frameWindow);
+	frameAnalysator = new FrameAnalysator(frameWindow, this);
 	if (frameAnalysator == NULL)
 	{
 		throw NotEnoughSpaceException();
@@ -188,6 +187,7 @@ MainWindow::MainWindow(Gui* gui, FrameWindow* fw, StatisticWindow* sw) :
 	viewFrameWindowChecked = false;
 	viewStatisticWindowChecked = false;
 	viewCalculatedPerspectiveChecked = false;
+	viewRoundNrChecked = false;
 	viewBallPositionChecked = false;
 	viewNullPositionChecked = false;
 	viewCrosshairChecked = false;
@@ -249,6 +249,72 @@ const UserObservations MainWindow::getUserObservations()
 {
 	Glib::Threads::Mutex::Lock lock(controlValueMutex);
 	return userObservations;
+}
+
+bool MainWindow::viewCalculatedPerspective()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewCalculatedPerspectiveChecked;
+}
+
+bool MainWindow::viewRoundNr()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewRoundNrChecked;
+}
+
+bool MainWindow::viewBallPosition()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewBallPositionChecked;
+}
+
+bool MainWindow::viewNullPosition()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewNullPositionChecked;
+}
+
+bool MainWindow::viewCrosshair()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewCrosshairChecked;
+}
+
+bool MainWindow::viewTimeSinceRoundStart()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewTimeSinceRoundStartChecked;
+}
+
+bool MainWindow::viewBallVelocity()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewBallVelocityChecked;
+}
+
+bool MainWindow::viewPlateVelocity()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewPlateVelocityChecked;
+}
+
+bool MainWindow::viewPerspectiveCalculation()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewPerspectiveCalculationChecked;
+}
+
+bool MainWindow::viewNullPosCalculation()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewNullPosCalculationChecked;
+}
+
+bool MainWindow::viewBallPosCalculation()
+{
+	Glib::Threads::Mutex::Lock lock(controlValueMutex);
+	return viewBallPosCalculationChecked;
 }
 
 void MainWindow::setUpWindow()
@@ -369,6 +435,15 @@ void MainWindow::loadSettings()
 		else
 		{
 			log("Setting \"" + STR_SETTING_VIEW_CALCULATED_PERSPECTIVE + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
+		}
+		if (settings[STR_SETTING_VIEW_ROUND_NR].type() == cv::FileNode::INT)
+		{
+			settings[STR_SETTING_VIEW_ROUND_NR] >> viewRoundNrChecked;
+			viewOptionsControls.view_round_nr->set_active(viewRoundNrChecked);
+		}
+		else
+		{
+			log("Setting \"" + STR_SETTING_VIEW_ROUND_NR + "\" beim Parsen von " + SETTINGS_FILE + " nicht geladen", WARNING);
 		}
 		if (settings[STR_SETTING_VIEW_BALL_POSITION].type() == cv::FileNode::INT)
 		{
@@ -516,6 +591,7 @@ void MainWindow::saveSettings()
 		settings << STR_SETTING_VIEW_FRAME_WINDOW << viewFrameWindowChecked;
 		settings << STR_SETTING_VIEW_STATISTIC_WINDOW << viewStatisticWindowChecked;
 		settings << STR_SETTING_VIEW_CALCULATED_PERSPECTIVE << viewCalculatedPerspectiveChecked;
+		settings << STR_SETTING_VIEW_ROUND_NR << viewRoundNrChecked;
 		settings << STR_SETTING_VIEW_BALL_POSITION << viewBallPositionChecked;
 		settings << STR_SETTING_VIEW_NULL_POSITION << viewNullPositionChecked;
 		settings << STR_SETTING_VIEW_CROSSHAIR << viewCrosshairChecked;

@@ -5,6 +5,8 @@
  *      Author: sven
  */
 
+#include <limits>
+
 #include "frame.h"
 
 Frame::Frame(const cv::Mat& mat)
@@ -14,7 +16,11 @@ Frame::Frame(const cv::Mat& mat)
 	roundNr = -1;
 	pts = -1;
 	timeSinceRoundStart = -1;
-	// TODO Auto-generated constructor stub
+	nullPosition = cv::Point(std::numeric_limits<int>::infinity(), std::numeric_limits<int>::infinity());
+	ballPosition = cv::Point(std::numeric_limits<int>::infinity(), std::numeric_limits<int>::infinity());
+	ballRoundTime = -1.0;
+	plateRoundTime = -1.0;
+	quali = QUALI_UNKNOWN;
 }
 
 Frame::Frame(const Frame& frame, const cv::Rect& roi)
@@ -24,10 +30,5 @@ Frame::Frame(const Frame& frame, const cv::Rect& roi)
 	roundNr = frame.roundNr;
 	pts = frame.pts;
 	timeSinceRoundStart = frame.timeSinceRoundStart;
-}
-
-Frame::~Frame()
-{
-	// TODO Auto-generated destructor stub
 }
 

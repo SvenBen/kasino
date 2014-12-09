@@ -7,12 +7,14 @@
 
 #include "round.h"
 
-Round::Round() {
+Round::Round()
+{
 	// TODO Auto-generated constructor stub
 
 }
 
-Round::~Round() {
+Round::~Round()
+{
 	// TODO Auto-generated destructor stub
 }
 

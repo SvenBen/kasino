@@ -14,11 +14,6 @@ void deleteFrameFreeFunc(gpointer data)
 	delete (Frame*)data;
 }
 
-void deletePacketFreeFunc(gpointer data)
-{
-	delete (AVPacket*)data;
-}
-
 void deleteStringFreeFunc(gpointer data)
 {
 	delete (std::string*)data;

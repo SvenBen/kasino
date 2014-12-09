@@ -16,7 +16,7 @@
 #include "image_saver.h"
 
 FrameAnalysator::FrameAnalysator(FrameWindow* frameWindow) :
-	QueueHolder(deletePacketFreeFunc)
+	QueueHolder(deleteFrameFreeFunc)
 {
 	this->frameWindow = frameWindow;
 	imgSaverQueueUser = NULL;
@@ -90,6 +90,8 @@ void FrameAnalysator::threadFunc()
 					delete manipulatedFrameRGB;
 				}
 			}
+
+			delete orgFrame;
 		}
 	}
 }

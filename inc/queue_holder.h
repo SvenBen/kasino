@@ -11,7 +11,6 @@
 #include "queues.h"
 
 void deleteFrameFreeFunc(gpointer data);
-void deletePacketFreeFunc(gpointer data);
 void deleteStringFreeFunc(gpointer data);
 
 template <class E>

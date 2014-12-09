@@ -41,3 +41,7 @@
 /Debug/src/frame_analysator.o
 /Debug/src/thread.d
 /Debug/src/thread.o
+/Debug/src/statistic.d
+/Debug/src/statistic.o
+/Debug/src/queue_holder.d
+/Debug/src/queue_holder.o

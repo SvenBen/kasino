@@ -18,6 +18,7 @@ extern "C"
 #include "thread.h"
 #include "queues.h"
 
+class ImageSaver;
 class Frame;
 class Round;
 class Statistic;
@@ -30,10 +31,14 @@ private:
 	Round* lastRound;
 	Statistic* activeStatistic;
 	FrameWindow* frameWindow;
+	ImageSaver* imgSaver;
+	QueueUser<Frame*>* imgSaverQueueUser;
 
 public:
 	FrameAnalysator(FrameWindow* frameWindow);
 	virtual ~FrameAnalysator();
+
+	void createFramesForImgSaver(bool onOff, ImageSaver* imgSaver = NULL);
 
 private:
 	virtual void threadFunc();

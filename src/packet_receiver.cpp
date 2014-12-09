@@ -166,7 +166,9 @@ char* const PacketReceiver::avErr2Str(const int error)
 void PacketReceiver::init()
 {
 	initAVLibs();
+	mainWindow->log("Oeffne Stream...", INFO);
 	openStream();
+	mainWindow->log("Stream goeffnet", INFO);
 	createPictureConverter();
 	createFrames();
 }
@@ -176,6 +178,7 @@ void PacketReceiver::exit()
 	destroyFrames();
 	destroyPictureConverter();
 	closeStream();
+	mainWindow->log("Stream geschlossen", INFO);
 	exitAVLibs();
 }
 
@@ -200,8 +203,6 @@ void PacketReceiver::openStream()
 	{
 		throw KasinoException(avErr2Str(error));
 	}
-
-	mainWindow->log("Stream geoeffnet", INFO);
 
 	// Retrieve stream information
 	error = avformat_find_stream_info(formatCtx, NULL);
@@ -259,8 +260,6 @@ void PacketReceiver::closeStream()
 	{
 		avformat_close_input(&formatCtx);
 	}
-
-	mainWindow->log("Stream geschlossen", INFO);
 }
 
 void PacketReceiver::createPictureConverter()

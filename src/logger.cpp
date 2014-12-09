@@ -49,6 +49,11 @@ void Logger::log(const std::string& msg, LogLevel logLevel)
 		push(copy);
 		statusWindow->notifyNewStatus();
 	}
+
+	if (logLevel == INFO)
+	{
+		std::cout << strlevel << msg << std::endl;
+	}
 	else
 	{
 		std::cerr << strlevel << msg << std::endl;

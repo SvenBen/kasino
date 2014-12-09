@@ -20,7 +20,7 @@ public:
 	Thread();
 	virtual ~Thread();
 
-public:
+protected:
 	virtual void threadFunc() = 0;
 };
 

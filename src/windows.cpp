@@ -44,7 +44,7 @@ FrameWindow::FrameWindow(Gui* gui) :
 	setUpCallbacks();
 }
 
-void FrameWindow::notifyNewFrame(boost::shared_ptr<Frame> sharedFrame)
+void FrameWindow::notifyNewFrame(SharedFramePtr sharedFrame)
 {
 	newFrameDispatcher.notify(sharedFrame);
 }
@@ -88,7 +88,7 @@ void FrameWindow::setUpCallbacks()
 
 void FrameWindow::cbNewFrame()
 {
-	boost::shared_ptr<Frame> sharedFrame = newFrameDispatcher.getValue();
+	SharedFramePtr sharedFrame = newFrameDispatcher.getValue();
 	frame_img->set(Gdk::Pixbuf::create_from_data(sharedFrame->mat.data, Gdk::COLORSPACE_RGB, false, 8, sharedFrame->mat.cols, sharedFrame->mat.rows, sharedFrame->mat.step));
 	frame_img->queue_draw();
 }
@@ -641,12 +641,13 @@ void MainWindow::destroyPacketReceiver()
 
 void MainWindow::createImageSaver()
 {
-	imageSaver = new ImageSaver(this);
+	imageSaver = new ImageSaver(this, frameAnalysator, imageRecordPath);
 	if (imageSaver == NULL)
 	{
 		throw KasinoException(STR_NOT_ENOUGH_SPACE);
 	}
 }
+
 void MainWindow::destroyImageSaver()
 {
 	SAFE_DELETE_NULL(imageSaver)

@@ -86,7 +86,6 @@ public:
 	QueueUser(QueueHolder<E>* holder);
 	virtual ~QueueUser();
 
-protected:
 	void push(E e);
 };
 
@@ -119,7 +118,7 @@ private:
 	AsyncQueue<E> queue;
 	// todo
 public:
-	QueueHolder(GDestroyNotify free_func);
+	QueueHolder(GDestroyNotify free_func = NULL);
 	virtual ~QueueHolder();
 	void push(E e);
 

@@ -1198,6 +1198,8 @@
                       <object class="GtkFileChooserButton" id="video_record_path">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="action">select-folder</property>
+                        <property name="title" translatable="yes">Select a Folder</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1276,6 +1278,8 @@
                       <object class="GtkFileChooserButton" id="image_record_path">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="action">select-folder</property>
+                        <property name="title" translatable="yes">Select a Folder</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>

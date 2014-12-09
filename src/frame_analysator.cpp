@@ -12,11 +12,14 @@
 #include "windows.h"
 #include "frame.h"
 #include "statistic.h"
+#include "macros.h"
+#include "image_saver.h"
 
 FrameAnalysator::FrameAnalysator(FrameWindow* frameWindow) :
 	QueueHolder(deletePacketFreeFunc)
 {
 	this->frameWindow = frameWindow;
+	imgSaverQueueUser = NULL;
 	activeRound = NULL;
 	lastRound = NULL;
 	activeStatistic = NULL;
@@ -31,7 +34,22 @@ FrameAnalysator::~FrameAnalysator()
 	{
 		thread->join();
 	}
+
+	createFramesForImgSaver(false);
 	// TODO
+}
+
+void FrameAnalysator::createFramesForImgSaver(bool onOff, ImageSaver* imgSaver)
+{
+	if (onOff)
+	{
+		assert(imgSaver != NULL);
+		imgSaverQueueUser = new QueueUser<Frame*>(imgSaver);
+	}
+	else
+	{
+		SAFE_DELETE_NULL(imgSaverQueueUser)
+	}
 }
 
 void FrameAnalysator::threadFunc()
@@ -41,7 +59,7 @@ void FrameAnalysator::threadFunc()
 		Frame* orgFrame = timeout_pop();
 		if (orgFrame != NULL)
 		{
-			if (frameWindow->getVisible())
+			if (frameWindow->getVisible() || imgSaverQueueUser != NULL)
 			{
 				// This frame is for all manipulations
 				Frame manipulatedFrameBGR(*orgFrame);
@@ -52,10 +70,25 @@ void FrameAnalysator::threadFunc()
 
 
 				// Create a shared Frame in RGB
-				boost::shared_ptr<Frame> manipulatedFrameRGB(new Frame(manipulatedFrameBGR));
-				cv::cvtColor(manipulatedFrameRGB->mat, manipulatedFrameRGB->mat, CV_BGR2RGB);
+				Frame* manipulatedFrameRGB = new Frame(manipulatedFrameBGR);
+				manipulatedFrameRGB->mat = manipulatedFrameRGB->mat.clone();
+				cv::cvtColor(manipulatedFrameBGR.mat, manipulatedFrameRGB->mat, CV_BGR2RGB);
+				if (frameWindow->getVisible())
+				{
+					Frame* manipulatedFrameRGBcopy = new Frame(*manipulatedFrameRGB);
+					manipulatedFrameRGBcopy->mat = manipulatedFrameRGBcopy->mat.clone();
+					SharedFramePtr manipulatedFrameRGBShared(manipulatedFrameRGBcopy);
+					frameWindow->notifyNewFrame(manipulatedFrameRGBShared);
+				}
 
-				frameWindow->notifyNewFrame(manipulatedFrameRGB);
+				if (imgSaverQueueUser != NULL)
+				{
+					imgSaverQueueUser->push(manipulatedFrameRGB);
+				}
+				else
+				{
+					delete manipulatedFrameRGB;
+				}
 			}
 		}
 	}

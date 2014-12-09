@@ -54,14 +54,14 @@ private:
 	static const std::string WINDOW_NAME;
 
 	Gtk::Image* frame_img;
-	ValueDispatcher<boost::shared_ptr<Frame>> newFrameDispatcher;
+	ValueDispatcher<SharedFramePtr> newFrameDispatcher;
 	MainWindow* mainWindow;
 	Glib::Threads::Mutex visibleMutex;
 	bool visible;
 
 public:
 	FrameWindow(Gui* gui);
-	void notifyNewFrame(boost::shared_ptr<Frame> sharedFrame);
+	void notifyNewFrame(SharedFramePtr sharedFrame);
 	void setVisible(bool v);
 	bool getVisible();
 	void setMainWindow(MainWindow* mainWindow);

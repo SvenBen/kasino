@@ -30,6 +30,7 @@ const std::string STR_SETTING_IMAGE_RECORD_PATH = "IMAGE_RECORD_PATH";
 const std::string STR_SETTING_ANALYZE = "ANALYZE";
 const std::string STR_SETTING_PATH_ROUND_LOG_FILE = "PATH_ROUND_LOG_FILE";
 
+const std::string STR_COULD_NOT_OPEN = "Kann Datei nicht oeffnen: ";
 const std::string STR_NOT_ENOUGH_SPACE = "Nicht genug Speicher";
 const std::string STR_ERR_READING_SETTINGS = "Fehler beim Lesen der Gui-Settings-Datei.";
 #define STR_CANNOT_OPEN_FILE(FILENAME) std::string("Kann die Datei \"") + (FILENAME) + "\" nicht öffnen"

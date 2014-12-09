@@ -14,12 +14,14 @@
 #include "statistic.h"
 #include "macros.h"
 #include "image_saver.h"
+#include "video_writer.h"
 
 FrameAnalysator::FrameAnalysator(FrameWindow* frameWindow) :
 	QueueHolder(deleteFrameFreeFunc)
 {
 	this->frameWindow = frameWindow;
 	imgSaverQueueUser = NULL;
+	vidWriterQueueUser = NULL;
 	activeRound = NULL;
 	lastRound = NULL;
 	activeStatistic = NULL;
@@ -36,7 +38,7 @@ FrameAnalysator::~FrameAnalysator()
 	}
 
 	createFramesForImgSaver(false);
-	// TODO
+	createFramesForVidWriter(false);
 }
 
 void FrameAnalysator::createFramesForImgSaver(bool onOff, ImageSaver* imgSaver)
@@ -52,6 +54,19 @@ void FrameAnalysator::createFramesForImgSaver(bool onOff, ImageSaver* imgSaver)
 	}
 }
 
+void FrameAnalysator::createFramesForVidWriter(bool onOff, VideoWriter* vidWriter)
+{
+	if (onOff)
+	{
+		assert(vidWriter != NULL);
+		vidWriterQueueUser = new QueueUser<Frame*>(vidWriter);
+	}
+	else
+	{
+		SAFE_DELETE_NULL(vidWriterQueueUser)
+	}
+}
+
 void FrameAnalysator::threadFunc()
 {
 	while (!quit)
@@ -59,35 +74,42 @@ void FrameAnalysator::threadFunc()
 		Frame* orgFrame = timeout_pop();
 		if (orgFrame != NULL)
 		{
-			if (frameWindow->getVisible() || imgSaverQueueUser != NULL)
+			if (frameWindow->getVisible() || imgSaverQueueUser != NULL || vidWriterQueueUser != NULL)
 			{
 				// This frame is for all manipulations
-				Frame manipulatedFrameBGR(*orgFrame);
-				manipulatedFrameBGR.mat = manipulatedFrameBGR.mat.clone();
+				Frame frameBGR(*orgFrame);
+				frameBGR.mat = orgFrame->mat.clone();
 
 
 				// todo manipulate here
 
 
 				// Create a shared Frame in RGB
-				Frame* manipulatedFrameRGB = new Frame(manipulatedFrameBGR);
-				manipulatedFrameRGB->mat = manipulatedFrameRGB->mat.clone();
-				cv::cvtColor(manipulatedFrameBGR.mat, manipulatedFrameRGB->mat, CV_BGR2RGB);
+				Frame* frameRGB = new Frame(frameBGR);
+				frameRGB->mat = frameRGB->mat.clone();
+				cv::cvtColor(frameBGR.mat, frameRGB->mat, CV_BGR2RGB);
 				if (frameWindow->getVisible())
 				{
-					Frame* manipulatedFrameRGBcopy = new Frame(*manipulatedFrameRGB);
-					manipulatedFrameRGBcopy->mat = manipulatedFrameRGBcopy->mat.clone();
-					SharedFramePtr manipulatedFrameRGBShared(manipulatedFrameRGBcopy);
-					frameWindow->notifyNewFrame(manipulatedFrameRGBShared);
+					Frame* frameRGBcopy = new Frame(*frameRGB);
+					frameRGBcopy->mat = frameRGBcopy->mat.clone();
+					SharedFramePtr frameRGBShared(frameRGBcopy);
+					frameWindow->notifyNewFrame(frameRGBShared);
+				}
+
+				if (vidWriterQueueUser != NULL)
+				{
+					Frame* frameRGBVid = new Frame(*frameRGB);
+					frameRGBVid->mat = frameRGB->mat.clone();
+					vidWriterQueueUser->push(frameRGBVid);
 				}
 
 				if (imgSaverQueueUser != NULL)
 				{
-					imgSaverQueueUser->push(manipulatedFrameRGB);
+					imgSaverQueueUser->push(frameRGB);
 				}
 				else
 				{
-					delete manipulatedFrameRGB;
+					delete frameRGB;
 				}
 			}
 

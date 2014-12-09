@@ -8,10 +8,8 @@
 #include "kasino_exception.h"
 #include "kasino_strings.h"
 
-KasinoException::KasinoException() {
-}
-
-KasinoException::~KasinoException() {
+KasinoException::KasinoException()
+{
 }
 
 KasinoException::KasinoException(const std::string& m)
@@ -28,6 +26,6 @@ NotEnoughSpaceException::NotEnoughSpaceException() : KasinoException(STR_NOT_ENO
 {
 }
 
-NotEnoughSpaceException::~NotEnoughSpaceException()
+FileOpenException::FileOpenException(const std::string& filename)  : KasinoException(STR_COULD_NOT_OPEN + filename)
 {
 }

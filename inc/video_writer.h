@@ -8,16 +8,33 @@
 #ifndef VIDEO_WRITER_H_
 #define VIDEO_WRITER_H_
 
+#include <opencv2/highgui/highgui.hpp>
+
+#include "thread.h"
+#include "frame.h"
+#include "queue_holder.h"
+
+class FrameAnalysator;
 class MainWindow;
 
-class VideoWriter
+class VideoWriter : public Thread, public QueueHolder<Frame*>
 {
 private:
 	MainWindow* mainWindow;
-	// todo
+	FrameAnalysator* frameAnalysator;
+	std::string savePath;
+	cv::VideoWriter videoWriter;
+
 public:
-	VideoWriter(MainWindow* mainWindow);
+	VideoWriter(MainWindow* mainWindow,
+				FrameAnalysator* frameAnalysator,
+				const std::string & savePath);
 	virtual ~VideoWriter();
+
+private:
+	void openVideoFile(int roundNr, const cv::Size2i& size);
+	void closeVideoFile();
+	virtual void threadFunc();
 };
 
 #endif /* VIDEO_WRITER_H_ */

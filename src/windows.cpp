@@ -621,7 +621,7 @@ void MainWindow::createPacketReceiver()
 		packetReceiver = new PacketReceiver(stream, this, frameAnalysator);
 		if (packetReceiver == NULL)
 		{
-			throw KasinoException(STR_NOT_ENOUGH_SPACE);
+			throw NotEnoughSpaceException();
 		}
 	}
 	catch (Glib::Exception& e)
@@ -641,10 +641,25 @@ void MainWindow::destroyPacketReceiver()
 
 void MainWindow::createImageSaver()
 {
-	imageSaver = new ImageSaver(this, frameAnalysator, imageRecordPath);
-	if (imageSaver == NULL)
+	try
 	{
-		throw KasinoException(STR_NOT_ENOUGH_SPACE);
+		imageSaver = new ImageSaver(this, frameAnalysator, imageRecordPath);
+		if (imageSaver == NULL)
+		{
+			throw NotEnoughSpaceException();
+		}
+	}
+	catch (Glib::Exception& e)
+	{
+		log(e.what(), ERROR);
+	}
+	catch (KasinoException& e)
+	{
+		log(e.what(), ERROR);
+	}
+	catch (cv::Exception& e)
+	{
+		log(e.what(), ERROR);
 	}
 }
 
@@ -655,10 +670,25 @@ void MainWindow::destroyImageSaver()
 
 void MainWindow::createVideoWriter()
 {
-	videoWriter = new VideoWriter(this);
-	if (videoWriter == NULL)
+	try
 	{
-		throw KasinoException(STR_NOT_ENOUGH_SPACE);
+		videoWriter = new VideoWriter(this, frameAnalysator, videoRecordPath);
+		if (videoWriter == NULL)
+		{
+			throw NotEnoughSpaceException();
+		}
+	}
+	catch (Glib::Exception& e)
+	{
+		log(e.what(), ERROR);
+	}
+	catch (KasinoException& e)
+	{
+		log(e.what(), ERROR);
+	}
+	catch (cv::Exception& e)
+	{
+		log(e.what(), ERROR);
 	}
 }
 

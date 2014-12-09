@@ -55,8 +55,8 @@ void ImageSaver::threadFunc()
 		Frame* frame = timeout_pop();
 		if (frame != NULL)
 		{
-			char number[11];
-			sprintf(number, "%05u.jpg", ImageSaver::imgNr++);
+			char number[10];
+			sprintf(number, "%05u", ImageSaver::imgNr++);
 			std::string filename(number + std::string(".png"));
 			cv::imwrite(savePath + "/" + filename, frame->mat);
 			delete frame;

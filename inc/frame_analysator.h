@@ -19,6 +19,7 @@ extern "C"
 #include "queue_user.h"
 #include "queue_holder.h"
 
+class VideoWriter;
 class ImageSaver;
 class Frame;
 class Round;
@@ -32,14 +33,15 @@ private:
 	Round* lastRound;
 	Statistic* activeStatistic;
 	FrameWindow* frameWindow;
-	ImageSaver* imgSaver;
 	QueueUser<Frame*>* imgSaverQueueUser;
+	QueueUser<Frame*>* vidWriterQueueUser;
 
 public:
 	FrameAnalysator(FrameWindow* frameWindow);
 	virtual ~FrameAnalysator();
 
 	void createFramesForImgSaver(bool onOff, ImageSaver* imgSaver = NULL);
+	void createFramesForVidWriter(bool onOff, VideoWriter* vidWriter = NULL);
 
 private:
 	virtual void threadFunc();

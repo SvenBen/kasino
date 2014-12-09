@@ -18,7 +18,6 @@ private:
 public:
 	KasinoException();
 	KasinoException(const std::string& m);
-	virtual ~KasinoException();
 
 	const std::string& what() const;
 };
@@ -27,7 +26,12 @@ class NotEnoughSpaceException : public KasinoException
 {
 public:
 	NotEnoughSpaceException();
-	virtual ~NotEnoughSpaceException();
+};
+
+class FileOpenException : public KasinoException
+{
+public:
+	FileOpenException(const std::string& filename);
 };
 
 #endif /* KASINO_EXCEPTION_H_ */

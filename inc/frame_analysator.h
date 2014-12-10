@@ -19,6 +19,7 @@ extern "C"
 #include "thread.h"
 #include "queue_user.h"
 #include "queue_holder.h"
+#include "perspective_calculator.h"
 
 class VideoWriter;
 class ImageSaver;
@@ -36,6 +37,7 @@ private:
 	Statistic* activeStatistic;
 	FrameWindow* frameWindow;
 	MainWindow* mainWindow;
+	PerspectiveCalculator perspectiveCalculator;
 	QueueUser<Frame*>* imgSaverQueueUser;
 	QueueUser<Frame*>* vidWriterQueueUser;
 	Glib::Threads::Mutex mutex;

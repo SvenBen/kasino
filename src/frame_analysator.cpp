@@ -16,6 +16,8 @@
 #include "image_saver.h"
 #include "video_writer.h"
 #include "mat_manipulator.h"
+#include "perspective_calculator.h"
+#include "kasino_exception.h"
 
 FrameAnalysator::FrameAnalysator(FrameWindow* frameWindow, MainWindow* mainWindow) :
 	QueueHolder(deleteFrameFreeFunc)
@@ -82,11 +84,41 @@ void FrameAnalysator::threadFunc()
 
 			if (frameWindow->getVisible() || imgSaverQueueUser != NULL || vidWriterQueueUser != NULL)
 			{
-				// frameBGR is for all manipulations
+				try
+				{
+					orgFrame->perspective = perspectiveCalculator.calculatePerspective(*orgFrame);
+					switch (orgFrame->perspective)
+					{
+					case PERSPECTIVE_1:
+					case PERSPECTIVE_2:
+					case PERSPECTIVE_3:
+					case PERSPECTIVE_4:
+					case PERSPECTIVE_5:
+						// todo calculate speed
+						break;
+
+					case PERSPECTIVE_UNKNOWN:
+						mainWindow->log("Perspektive konnte nicht ermittelt werden", WARNING);
+						break;
+
+					case PERSPECTIVE_OTHER:
+						break;
+					}
+				}
+				catch (cv::Exception& e)
+				{
+					mainWindow->log(e.what());
+				}
+				catch (KasinoException& e)
+				{
+					mainWindow->log(e.what());
+				}
+
+				mainWindow->notifyPerspectiveCalculated(orgFrame->perspective);
+
+				// Write and draw infos in Mat to a new Mat frameBGR
 				Frame frameBGR(*orgFrame);
 				frameBGR.mat = orgFrame->mat.clone();
-
-				// Write and draw infos in Mat
 				MatManipulator m(&frameBGR, mainWindow);
 				m.drawInfos();
 

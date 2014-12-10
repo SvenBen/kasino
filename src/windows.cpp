@@ -3,6 +3,7 @@
 #include <gtkmm/window.h>
 #include <assert.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include "windows.h"
@@ -128,6 +129,7 @@ void StatusWindow::addToLog(const std::string& msg)
 {
 	Glib::RefPtr<Gtk::TextBuffer> buf = status->get_buffer();
 	buf->insert_at_cursor(msg + "\n");
+	status->scroll_to(buf->get_insert()); // Scroll down // todo funzt aber nicht
 }
 
 void StatusWindow::cbNewStatus()
@@ -684,7 +686,29 @@ void MainWindow::cbVideoWriterDestroyed()
 
 void MainWindow::cbPerspectiveCalculated()
 {
-	// todo
+	std::string perspectiveStr;
+	Perspective p = perspectiveCalculatedDispatcher.getValue();
+	std::ostringstream oss;
+	switch (p)
+	{
+	case PERSPECTIVE_1:
+	case PERSPECTIVE_2:
+	case PERSPECTIVE_3:
+	case PERSPECTIVE_4:
+	case PERSPECTIVE_5:
+		oss << p;
+		perspectiveStr = oss.str();
+		break;
+
+	case PERSPECTIVE_OTHER:
+		perspectiveStr = "andere";
+		break;
+
+	case PERSPECTIVE_UNKNOWN:
+		perspectiveStr = "unbestimmt";
+	}
+
+	dataRecordControls.perspective_nr->set_text(perspectiveStr);
 }
 
 void MainWindow::createPacketReceiver()
@@ -771,6 +795,11 @@ void MainWindow::createVideoWriter()
 void MainWindow::destroyVideoWriter()
 {
 	SAFE_DELETE_NULL(videoWriter)
+}
+
+void MainWindow::notifyPerspectiveCalculated(Perspective p)
+{
+	perspectiveCalculatedDispatcher.notify(p);
 }
 
 void MainWindow::notifyPacketReceiverDestroyed()

@@ -779,8 +779,8 @@
                               <object class="GtkLabel" id="perspective_nr">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="width_chars">1</property>
-                                <property name="max_width_chars">1</property>
+                                <property name="width_chars">10</property>
+                                <property name="max_width_chars">10</property>
                                 <property name="lines">1</property>
                               </object>
                               <packing>

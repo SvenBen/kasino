@@ -169,6 +169,7 @@ public:
 	bool viewNullPosCalculation();
 	bool viewBallPosCalculation();
 
+	void notifyPerspectiveCalculated(Perspective p);
 	void notifyPacketReceiverDestroyed();
 	void notifyImageSaverDestroyed();
 	void notifyVideoWriterDestroyed();
